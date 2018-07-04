@@ -82,7 +82,8 @@ class App extends Component {
                   variant="contained"
                   color="primary"
                   onClick={() => this.setState({ view: 'block' })}
-                  style={{ margin: '0 5px 5px 0' }}
+                  style={{ margin: '5px' }}
+                  disabled={this.state.view == 'block'}
                 >
                   Build a new block
                 </Button>
@@ -90,6 +91,8 @@ class App extends Component {
                   variant="raised"
                   color="primary"
                   onClick={() => this.setState({ view: 'calendar' })}
+                  style={{ margin: '5px' }}
+                  disabled={this.state.view == 'calendar'}
                 >
                   Schedule blocks
                 </Button>

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import Button from "@material-ui/core/Button";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import PiList from "./components/PiList/PiList";
@@ -52,7 +52,15 @@ class App extends Component {
         <div className="grid">
           <div className="left-menu-wrapper">
             <PiList items={this.state.pis} />
-            <Card className="middle-card" raised>
+            <Card style={{ alignSelf: 'flex-start', backgroundColor: this.state.view == 'block' ? 'cornflowerblue' : '#f50057', color: this.state.view == 'block' ? 'black' : 'white', transition: 'all 0.5s ease-in' }}>
+              <CardContent>
+                {this.state.view == 'block' ?
+                  <Fragment><h1>Build blocks!</h1><p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate voluptate sequi suscipit aliquid assumenda, iure debitis totam ipsum quisquam? Sunt.</p></Fragment>
+                  : <h1>Calendar</h1>
+                }
+              </CardContent>
+            </Card>
+            <Card raised>
               <CardContent>
                 <h2>Upload your own videos</h2>
                 <p>
@@ -62,7 +70,7 @@ class App extends Component {
                 </p>
                 <Button
                   variant="contained"
-                  color="secondary"
+                  color="primary"
                   onClick={this.toggleUploadDialog}
                 >
                   Begin upload wizard
@@ -80,7 +88,7 @@ class App extends Component {
                 </p>
                 <Button
                   variant="contained"
-                  color="primary"
+                  color="secondary"
                   onClick={() => this.setState({ view: 'block' })}
                   style={{ margin: '5px' }}
                   disabled={this.state.view == 'block'}
@@ -89,7 +97,7 @@ class App extends Component {
                 </Button>
                 <Button
                   variant="raised"
-                  color="primary"
+                  color={"primary"}
                   onClick={() => this.setState({ view: 'calendar' })}
                   style={{ margin: '5px' }}
                   disabled={this.state.view == 'calendar'}

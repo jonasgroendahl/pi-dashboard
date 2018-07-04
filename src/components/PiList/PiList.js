@@ -12,7 +12,7 @@ import ImageIcon from "@material-ui/icons/Image";
 export default class PiList extends Component {
   render() {
     return (
-      <ExpansionPanel style={{ width: '100%' }}>
+      <ExpansionPanel>
         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
           <ListItem>
             <Avatar>
@@ -28,17 +28,8 @@ export default class PiList extends Component {
                 <Avatar>
                   <ImageIcon />
                 </Avatar>
-                <ListItemText primary={i.name} secondary="Jan 9, 2014" />
-                <ListItemText>
-                  <h4
-                    style={{
-                      color: "#CCFF90",
-                      fontFamily: "Montserrat"
-                    }}
-                  >
-                    Running
-                  </h4>
-                </ListItemText>
+                <ListItemText primary={i.name} secondary="Running" />
+
               </ListItem>
             ))}
           </List>

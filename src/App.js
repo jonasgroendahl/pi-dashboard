@@ -7,17 +7,31 @@ import "./App.css";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import UploadDialog from "./components/UploadDialog/UploadDialog";
+import BlockList from "./components/BlockList/BlockList";
+import PiContentList from "./components/PiContentList/PiContentList";
+import Calendar from "./components/Calendar/Calendar";
 
 class App extends Component {
   state = {
     pis: [],
-    uploading: false
+    blocks: [],
+    uploading: false,
+    picontent: [],
+    view: 'block'
   };
 
   componentDidMount() {
     axios.get("https://api-wexer.herokuapp.com/v1/pi?gym_id=2415").then(res => {
       console.log(res);
       this.setState({ pis: res.data });
+    });
+    axios.get("https://api-wexer.herokuapp.com/v1/pi/blocks?gym_id=2415").then(res => {
+      console.log("blocks", res);
+      this.setState({ blocks: res.data });
+    });
+    axios.get("https://api-wexer.herokuapp.com/v1/pi/content?gym_id=2415").then(res => {
+      console.log("content", res);
+      this.setState({ picontent: res.data });
     });
   }
 
@@ -26,13 +40,19 @@ class App extends Component {
     this.setState({ uploading: !uploading });
   };
 
+  addBlock = (block) => {
+    const { blocks } = this.state;
+    blocks.push(block);
+    this.setState({ blocks });
+  }
+
   render() {
     return (
       <div className="App">
         <div className="grid">
-          <div>
+          <div className="left-menu-wrapper">
             <PiList items={this.state.pis} />
-            <Card>
+            <Card className="middle-card" raised>
               <CardContent>
                 <h2>Upload your own videos</h2>
                 <p>
@@ -42,25 +62,58 @@ class App extends Component {
                 </p>
                 <Button
                   variant="contained"
-                  color="default"
+                  color="secondary"
                   onClick={this.toggleUploadDialog}
                 >
-                  Upload
+                  Begin upload wizard
                   <CloudUploadIcon style={{ marginLeft: "15px" }} />
                 </Button>
               </CardContent>
             </Card>
-
+            <Card raised className="middle-card">
+              <CardContent>
+                <h2>Manage your content</h2>
+                <p>
+                  Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+                  Eaque iure velit quidem nesciunt rem, ullam porro recusandae
+                  ut tenetur dolorem?
+                </p>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => this.setState({ view: 'block' })}
+                  style={{ margin: '0 5px 5px 0' }}
+                >
+                  Build a new block
+                </Button>
+                <Button
+                  variant="raised"
+                  color="primary"
+                  onClick={() => this.setState({ view: 'calendar' })}
+                >
+                  Schedule blocks
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent>
+                <h2>Your blocks</h2>
+                <BlockList items={this.state.blocks} />
+              </CardContent>
+            </Card>
             <UploadDialog
               show={this.state.uploading}
               toggleUploadDialog={this.toggleUploadDialog}
+              addBlock={this.addBlock}
             />
           </div>
           <div>
-            <h2>s</h2>
+            {
+              this.state.view == 'block' ? <PiContentList addBlock={this.addBlock} items={this.state.picontent} /> : <Calendar />
+            }
           </div>
         </div>
-      </div>
+      </div >
     );
   }
 }

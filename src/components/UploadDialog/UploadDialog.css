@@ -2,4 +2,14 @@
   display: flex;
   text-align: center;
   justify-content: center;
+  align-items: flex-start;
+
+}
+
+.column{
+  flex-direction: column;
+}
+
+.row{
+  flex-direction: row;
 }

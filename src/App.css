@@ -2,17 +2,38 @@ body {
   font-family: "Open Sans";
 }
 
+.App{
+  background: url('http://ksotirov.com/wp-content/uploads/2015/08/wexer_virtual.jpg?id=2229') no-repeat center center fixed;
+  background-size:cover;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-gap: 10px;
   padding: 30px;
+  align-items:flex-start;
 }
 
 .exp {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.left-menu-wrapper{
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.left-menu-wrapper > :nth-child(3){
+  margin: 5px 0 5px 0;
+  max-width: 50%;
+}
+
+.middle-card{
+  max-width: calc(50% - 5px);
+  margin: 5px 5px 5px 0;
 }
 
 @keyframes App-logo-spin {

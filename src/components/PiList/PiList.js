@@ -6,14 +6,13 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import Avatar from "@material-ui/core/Avatar";
 import ImageIcon from "@material-ui/icons/Image";
 
 export default class PiList extends Component {
   render() {
     return (
-      <ExpansionPanel defaultExpanded>
+      <ExpansionPanel style={{ width: '100%' }}>
         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
           <ListItem>
             <Avatar>

@@ -1,0 +1,34 @@
+#calendar .fc-right{
+    display:none;
+}
+
+#calendar .fc-toolbar.fc-header-toolbar{
+    display: flex;
+    justify-content: center;
+    color:white;
+    font-family: "Montserrat";
+}
+
+#calendar thead{
+    border-color:white;
+}
+
+#calendar th{
+    color:white;
+}
+#calendar table tr td span{
+    color:white;
+}
+
+#calendar td.fc-today{
+    /*background: rgba(167, 255, 234, 0.979) !important;*/
+    background:transparent;
+}
+
+#calendar .fc-event{
+    background: #f50057;
+    padding:5px;
+    border-radius:10px;
+    border:none;
+    font-family: "Open Sans";
+}

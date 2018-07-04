@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -14,16 +14,22 @@ import DoneIcon from "@material-ui/icons/Done";
 import CloseIcon from "@material-ui/icons/Close";
 
 import "./UploadDialog.css";
+import { Checkbox, FormControlLabel, Zoom, TextField } from "@material-ui/core";
 
 export default class extends Component {
   constructor(props) {
     super(props);
     this.state = {
       activeStep: 0,
-      autoCloseTimer: 5
+      autoCloseTimer: 5,
+      isSavedAsBlock: false,
+      block: {
+        name: '',
+        src: '',
+        duration: 0
+      }
     };
     this.uploadRef = React.createRef();
-    this.autoCloseTimerInterval = null;
   }
 
   componentDidMount() {
@@ -42,51 +48,63 @@ export default class extends Component {
     this.setState({ activeStep: 1 });
     setTimeout(() => {
       this.setState({ activeStep: 2 });
-      this.autoCloseTimerInterval = setInterval(() => {
-        const { autoCloseTimer } = this.state;
-        if (autoCloseTimer == 0) {
-          this.onUploadDialogClose();
-        } else {
-          this.setState({ autoCloseTimer: autoCloseTimer - 1 });
-        }
-      }, 1000);
     }, 5000);
   };
 
   onUploadDialogClose = () => {
     clearInterval(this.autoCloseTimerInterval);
-    this.setState({ activeStep: 0, autoCloseTimer: 5 });
     this.props.toggleUploadDialog();
+    if (this.state.isSavedAsBlock) {
+      this.props.addBlock(this.state.block);
+    }
+    this.setState({ activeStep: 0, autoCloseTimer: 5, isSavedAsBlock: false });
   };
+
+  handleCheckboxChange = () => {
+    const { isSavedAsBlock } = this.state;
+    this.setState({ isSavedAsBlock: !isSavedAsBlock });
+  }
+
+  onChange = (event) => {
+    const { block } = this.state;
+    block.name = event.target.value;
+    this.setState({ block });
+  }
 
   getStepContent = step => {
     switch (step) {
       case 0:
         return (
-          <Fragment>
+          <div className="stepper-content-div column">
             <p>
               Lorem ipsum dolor sit amet consectetur, adipisicing elit.
               Assumenda, corrupti.
             </p>
-            <IconButton color="primary" onClick={this.startUpload}>
-              <AddIcon />
-            </IconButton>
-            <IconButton color="primary" onClick={this.onUploadDialogClose}>
-              <CloseIcon />
-            </IconButton>
-          </Fragment>
+            <TextField value={this.state.block.name} onChange={this.onChange} label="Name of file" style={{ marginBottom: '20px' }} />
+            <Button variant="raised" color="primary" onClick={this.startUpload} disabled={this.state.block.name.length < 3}>
+              Upload
+            </Button>
+          </div>
         );
       case 1:
-        return <CircularProgress color="primary" thickness={7} />;
+        return <div className="stepper-content-div"><CircularProgress color="primary" thickness={7} /></div>;
       case 2:
         return (
-          <Fragment>
-            <DoneIcon style={{ color: "green", width: 55, height: 55 }} />
-            <Button
-              color="primary"
-              onClick={this.onUploadDialogClose}
-            >{`Close (Auto close in ${this.state.autoCloseTimer})`}</Button>
-          </Fragment>
+          <div className="stepper-content-div column" style={{ alignItems: 'center' }}>
+            <div>
+              <Zoom in={true} timeout={2000}>
+                <DoneIcon style={{ color: "green", width: 100, height: 100 }} />
+              </Zoom>
+            </div>
+            <div>
+              <Button
+                color="primary"
+                onClick={this.onUploadDialogClose}
+              >Close</Button>
+              <FormControlLabel control={<Checkbox onChange={this.handleCheckboxChange} />} label="Save as a block?">
+              </FormControlLabel>
+            </div>
+          </div>
         );
       default:
         return (
@@ -106,7 +124,12 @@ export default class extends Component {
         onClose={this.handleClose}
         aria-labelledby="responsive-dialog-title"
       >
-        <DialogTitle id="responsive-dialog-title">
+        {this.state.activeStep == 0 &&
+          <IconButton color="primary" onClick={this.onUploadDialogClose} style={{ alignSelf: 'flex-end' }}>
+            <CloseIcon />
+          </IconButton>
+        }
+        <DialogTitle id="responsive-dialog-title" style={{ paddingTop: this.state.activeStep == 0 ? 0 : '24px' }}>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit,
           minima.
         </DialogTitle>
@@ -120,7 +143,7 @@ export default class extends Component {
               );
             })}
           </Stepper>
-          <div className="stepper-content-div">
+          <div>
             {this.getStepContent(this.state.activeStep)}
           </div>
         </DialogContent>

@@ -19,9 +19,7 @@ export default class PiContentList extends Component {
   state = {
     currentIndex: 0,
     block: [],
-    showBlockDialog: false,
-    name: "",
-    duration: 0
+    showBlockDialog: false
   };
 
   decreaseCurrentIndex = () => {
@@ -71,13 +69,13 @@ export default class PiContentList extends Component {
     this.setState({ block });
   };
 
-  handleBlockNameChange = event => {
-    this.setState({ name: event.target.value });
-  };
-
-  handleSaveBlock = () => {
-    const { block, name } = this.state;
-    this.props.addBlock({ name });
+  handleSaveBlock = blockName => {
+    const { block } = this.state;
+    const combinedDuration = block.reduce(
+      (acc, blockItem) => (acc += blockItem.duration * blockItem.amount),
+      0
+    );
+    this.props.addBlock({ name: blockName, duration: combinedDuration });
     block.splice(0, block.length);
     this.setState({ showBlockDialog: false, block });
   };
@@ -155,7 +153,7 @@ export default class PiContentList extends Component {
         </div>
         <div className="block-grid">
           {this.state.block.map((item, index) => (
-            <Card>
+            <Card style={{ animation: "0.3s slideUp" }}>
               <CardContent>
                 <div style={{ display: "flex" }}>
                   <Avatar
@@ -217,7 +215,6 @@ export default class PiContentList extends Component {
             toggleBlockDialog={this.toggleBlockDialog}
             items={this.state.block}
             handleSaveBlock={this.handleSaveBlock}
-            handleBlockNameChange={this.handleBlockNameChange}
           />
         }
       </div>

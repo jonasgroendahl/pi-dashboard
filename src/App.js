@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
 import Button from "@material-ui/core/Button";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+import { Event } from "@material-ui/icons";
 import PiList from "./components/PiList/PiList";
 import axios from "axios";
 import "./App.css";
@@ -11,12 +12,14 @@ import BlockList from "./components/BlockList/BlockList";
 import PiContentList from "./components/PiContentList/PiContentList";
 import Calendar from "./components/Calendar/Calendar";
 import PiDialog from "./components/PiDialog/PiDialog";
+import { Select, MenuItem, Grid } from "@material-ui/core";
 
 class App extends Component {
   state = {
     pis: [],
     selectedPi: null,
     blocks: [],
+    selectedBlock: null,
     isUploading: false,
     isEditingPi: false,
     picontent: [],
@@ -76,6 +79,25 @@ class App extends Component {
     this.setState({ pis, selectedPi: null, isEditingPi: false });
   };
 
+  setSelectedBlock = block => {
+    this.setState({ selectedBlock: block });
+  };
+
+  changeView = () => {
+    let { view, selectedCalendar, calendars } = this.state;
+    if (view == "calendar") {
+      view = "block";
+    } else {
+      view = "calendar";
+      selectedCalendar = calendars.length > 0 ? calendars[0].id : 0;
+    }
+    this.setState({ view, selectedCalendar });
+  };
+
+  handleCalendarChange = event => {
+    this.setState({ selectedCalendar: event.target.value });
+  };
+
   render() {
     return (
       <div className="App">
@@ -94,7 +116,7 @@ class App extends Component {
                 <Button
                   variant="contained"
                   color="secondary"
-                  onClick={() => this.setState({ view: "block" })}
+                  onClick={this.changeView}
                   style={{ margin: "5px" }}
                   disabled={this.state.view == "block"}
                 >
@@ -103,7 +125,7 @@ class App extends Component {
                 <Button
                   variant="raised"
                   color={"primary"}
-                  onClick={() => this.setState({ view: "calendar" })}
+                  onClick={this.changeView}
                   style={{ margin: "5px" }}
                   disabled={this.state.view == "calendar"}
                 >
@@ -130,11 +152,32 @@ class App extends Component {
                     </p>
                   </Fragment>
                 ) : (
-                  <h1>Calendar</h1>
+                  <Fragment>
+                    <h1>Calendar</h1>
+                    <p>
+                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                      Reiciendis, perspiciatis?
+                    </p>
+                    <div className="flex">
+                      <Event style={{ marginRight: 10 }} />
+                      <Select
+                        value={this.state.selectedCalendar}
+                        onChange={this.handleCalendarChange}
+                        fullWidth
+                        className="white-select"
+                      >
+                        {this.state.calendars.map(calendar => (
+                          <MenuItem value={calendar.id}>
+                            {calendar.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </div>
+                  </Fragment>
                 )}
               </CardContent>
             </Card>
-            <Card raised>
+            <Card raised style={{ alignSelf: "flex-start" }}>
               <CardContent>
                 <h2>Upload your own videos</h2>
                 <p>
@@ -155,7 +198,11 @@ class App extends Component {
             <Card>
               <CardContent>
                 <h2>Your blocks</h2>
-                <BlockList items={this.state.blocks} />
+                <BlockList
+                  items={this.state.blocks}
+                  setSelectedBlock={this.setSelectedBlock}
+                  selectedBlock={this.state.selectedBlock}
+                />
               </CardContent>
             </Card>
             <UploadDialog
@@ -180,7 +227,10 @@ class App extends Component {
                 items={this.state.picontent}
               />
             ) : (
-              <Calendar />
+              <Calendar
+                selectedBlock={this.state.selectedBlock}
+                selectedCalendar={this.state.selectedCalendar}
+              />
             )}
           </div>
         </div>

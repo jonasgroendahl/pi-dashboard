@@ -36,24 +36,24 @@ body {
   grid-gap: 2.5px;
 }
 
-.slideIn-enter,
-.slideIn-appear {
-  transform: translateX(-50px, 0, 0);
+.white-select {
+  color: white !important;
 }
 
-.slideIn-enter-active,
-.slideIn-appear-active {
-  transition: all 0.15s ease-in;
-  transform: translateX(0, 0, 0);
+.white-select * {
+  color: white !important;
 }
 
-.slideIn-exit {
-  transition: all 0.15s ease-in;
-  transform: translateX(0, 0, 0);
+.white-select *:after {
+  border-color: white !important;
 }
 
-.slideIn-exit-active {
-  transform: translateX(50px, 0, 0);
+.MuiInput-underline-169:before {
+  border-color: #eee !important;
+}
+
+.MuiInput-underline-169:after {
+  border-color: white !important;
 }
 
 @keyframes App-logo-spin {

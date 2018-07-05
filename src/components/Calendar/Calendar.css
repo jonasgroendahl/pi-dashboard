@@ -11,6 +11,11 @@
 
 #calendar {
   animation: slideUp 0.3s ease-in;
+  height: 95vh;
+}
+
+#calendar .fc-event .fc-bg {
+  opacity: 0;
 }
 
 #calendar .fc-right {
@@ -43,7 +48,7 @@
 #calendar .fc-event {
   background: #f50057;
   padding: 5px;
-  border-radius: 10px;
+  border-radius: 0;
   border: none;
   font-family: "Open Sans";
 }

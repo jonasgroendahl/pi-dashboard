@@ -1,32 +1,36 @@
-.pi-content-list{
-    display:flex;
-    flex-flow: row wrap;
+.pi-content-list {
+  display: flex;
+  flex-flow: row wrap;
 }
 
-.pi-content-list > *{
-    display:flex;
-    flex-flow: row wrap;
+.pi-content-list > * {
+  display: flex;
+  flex-flow: row wrap;
 }
 
-.pi-content-nav{
-    display: flex;
-    width:100%;
+.pi-content-nav {
+  display: flex;
+  width: 100%;
 }
 
-.pi-content-span{
-    background-color: white;
-    padding: 5px;
-    position: absolute;
+.pi-content-span {
+  background-color: white;
+  padding: 5px;
+  position: absolute;
+}
+
+.pi-content-wrapper {
+  animation: slideUp 0.3s ease-in;
 }
 
 .pi-content-wrapper > * {
-    margin: 5px 0;
+  margin: 5px 0;
 }
 
 .block-grid > * {
-    margin: 5px 0;
+  margin: 5px 0;
 }
 
-.block-grid h5{
-    padding-left:15px;
+.block-grid h5 {
+  padding-left: 15px;
 }

@@ -8,6 +8,8 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import Avatar from "@material-ui/core/Avatar";
 import ImageIcon from "@material-ui/icons/Image";
+import { Build } from "@material-ui/icons";
+import { ListItemSecondaryAction, IconButton } from "@material-ui/core";
 
 export default class PiList extends Component {
   render() {
@@ -23,13 +25,17 @@ export default class PiList extends Component {
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
           <List>
-            {this.props.items.map(i => (
+            {this.props.items.map((i, index) => (
               <ListItem>
                 <Avatar>
                   <ImageIcon />
                 </Avatar>
                 <ListItemText primary={i.name} secondary="Running" />
-
+                <ListItemSecondaryAction>
+                  <IconButton onClick={() => this.props.toggleEditPi(index)}>
+                    <Build />
+                  </IconButton>
+                </ListItemSecondaryAction>
               </ListItem>
             ))}
           </List>

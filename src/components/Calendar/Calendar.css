@@ -1,34 +1,49 @@
-#calendar .fc-right{
-    display:none;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate3d(-50px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
-#calendar .fc-toolbar.fc-header-toolbar{
-    display: flex;
-    justify-content: center;
-    color:white;
-    font-family: "Montserrat";
+#calendar {
+  animation: slideUp 0.3s ease-in;
 }
 
-#calendar thead{
-    border-color:white;
+#calendar .fc-right {
+  display: none;
 }
 
-#calendar th{
-    color:white;
-}
-#calendar table tr td span{
-    color:white;
-}
-
-#calendar td.fc-today{
-    /*background: rgba(167, 255, 234, 0.979) !important;*/
-    background:transparent;
+#calendar .fc-toolbar.fc-header-toolbar {
+  display: flex;
+  justify-content: center;
+  color: white;
+  font-family: "Montserrat";
 }
 
-#calendar .fc-event{
-    background: #f50057;
-    padding:5px;
-    border-radius:10px;
-    border:none;
-    font-family: "Open Sans";
+#calendar thead {
+  border-color: white;
+}
+
+#calendar th {
+  color: white;
+}
+#calendar table tr td span {
+  color: white;
+}
+
+#calendar td.fc-today {
+  /*background: rgba(167, 255, 234, 0.979) !important;*/
+  background: transparent;
+}
+
+#calendar .fc-event {
+  background: #f50057;
+  padding: 5px;
+  border-radius: 10px;
+  border: none;
+  font-family: "Open Sans";
 }

@@ -2,9 +2,18 @@ body {
   font-family: "Open Sans";
 }
 
-.App{
-  background: url('http://ksotirov.com/wp-content/uploads/2015/08/wexer_virtual.jpg?id=2229') no-repeat center center fixed;
-  background-size:cover;
+.App {
+  background: url("http://ksotirov.com/wp-content/uploads/2015/08/wexer_virtual.jpg?id=2229")
+    no-repeat center center fixed;
+  background-size: cover;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex > * {
+  margin: 5px 0;
 }
 
 .grid {
@@ -12,7 +21,7 @@ body {
   grid-template-columns: repeat(2, 1fr);
   grid-gap: 10px;
   padding: 30px;
-  align-items:flex-start;
+  align-items: flex-start;
 }
 
 .exp {
@@ -21,12 +30,31 @@ body {
   align-items: center;
 }
 
-.left-menu-wrapper{
+.left-menu-wrapper {
   display: grid;
-  grid-template-columns: repeat(2,1fr);
+  grid-template-columns: repeat(2, 1fr);
   grid-gap: 2.5px;
 }
 
+.slideIn-enter,
+.slideIn-appear {
+  transform: translateX(-50px, 0, 0);
+}
+
+.slideIn-enter-active,
+.slideIn-appear-active {
+  transition: all 0.15s ease-in;
+  transform: translateX(0, 0, 0);
+}
+
+.slideIn-exit {
+  transition: all 0.15s ease-in;
+  transform: translateX(0, 0, 0);
+}
+
+.slideIn-exit-active {
+  transform: translateX(50px, 0, 0);
+}
 
 @keyframes App-logo-spin {
   from {

@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
 import Button from "@material-ui/core/Button";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import { Event } from "@material-ui/icons";
+import { Event, Share, Add } from "@material-ui/icons";
 import PiList from "./components/PiList/PiList";
 import axios from "axios";
 import "./App.css";
@@ -12,7 +12,8 @@ import BlockList from "./components/BlockList/BlockList";
 import PiContentList from "./components/PiContentList/PiContentList";
 import Calendar from "./components/Calendar/Calendar";
 import PiDialog from "./components/PiDialog/PiDialog";
-import { Select, MenuItem, Grid } from "@material-ui/core";
+import CalendarDialog from "./components/CalendarDialog/CalendarDialog";
+import { Select, MenuItem } from "@material-ui/core";
 
 class App extends Component {
   state = {
@@ -20,8 +21,10 @@ class App extends Component {
     selectedPi: null,
     blocks: [],
     selectedBlock: null,
+    selectedBlockEdit: null,
     isUploading: false,
     isEditingPi: false,
+    isCalendarDialogShowing: false,
     picontent: [],
     view: "block",
     calendars: []
@@ -66,6 +69,13 @@ class App extends Component {
     this.setState({ blocks });
   };
 
+  editBlock = block => {
+    const { blocks } = this.state;
+    const index = blocks.findIndex(bl => bl.id == block.id);
+    blocks[index] = block;
+    this.setState({ blocks });
+  };
+
   toggleEditPi = index => {
     let { isEditingPi, selectedPi } = this.state;
     selectedPi = this.state.pis[index];
@@ -74,7 +84,7 @@ class App extends Component {
 
   editPi = pi => {
     const { selectedPi, pis } = this.state;
-    const piIndex = pis.findIndex(pi => pi == selectedPi);
+    const piIndex = pis.findIndex(pi => pi === selectedPi);
     pis[piIndex] = pi;
     this.setState({ pis, selectedPi: null, isEditingPi: false });
   };
@@ -83,19 +93,51 @@ class App extends Component {
     this.setState({ selectedBlock: block });
   };
 
-  changeView = () => {
-    let { view, selectedCalendar, calendars } = this.state;
-    if (view == "calendar") {
-      view = "block";
-    } else {
-      view = "calendar";
+  editSelectedBlock = blockIndex => {
+    this.setState({
+      selectedBlock: this.state.blocks[blockIndex],
+      selectedBlockEdit: this.state.blocks[blockIndex],
+      view: "block"
+    });
+  };
+
+  changeView = view => {
+    let {
+      selectedCalendar,
+      calendars,
+      selectedBlockEdit,
+      selectedBlock
+    } = this.state;
+    if (view === "block") {
+      selectedBlockEdit = null;
+      selectedBlock = null;
       selectedCalendar = calendars.length > 0 ? calendars[0].id : 0;
     }
-    this.setState({ view, selectedCalendar });
+    this.setState({ view, selectedCalendar, selectedBlockEdit, selectedBlock });
   };
 
   handleCalendarChange = event => {
     this.setState({ selectedCalendar: event.target.value });
+  };
+
+  publishChanges = () => {
+    alert("Changes published");
+  };
+
+  toggleCalendarDialog = () => {
+    const { isCalendarDialogShowing } = this.state;
+    this.setState({ isCalendarDialogShowing: !isCalendarDialogShowing });
+  };
+
+  addCalendarHandler = name => {
+    const { calendars } = this.state;
+    const calendarObj = {
+      id: 9999,
+      name
+    };
+    calendars.push(calendarObj);
+    this.toggleCalendarDialog();
+    this.setState({ calendars });
   };
 
   render() {
@@ -116,18 +158,21 @@ class App extends Component {
                 <Button
                   variant="contained"
                   color="secondary"
-                  onClick={this.changeView}
+                  onClick={() => this.changeView("block")}
                   style={{ margin: "5px" }}
-                  disabled={this.state.view == "block"}
+                  disabled={
+                    this.state.view === "block" &&
+                    this.state.selectedBlockEdit === null
+                  }
                 >
                   Build a new block
                 </Button>
                 <Button
                   variant="raised"
                   color={"primary"}
-                  onClick={this.changeView}
+                  onClick={() => this.changeView("calendar")}
                   style={{ margin: "5px" }}
-                  disabled={this.state.view == "calendar"}
+                  disabled={this.state.view === "calendar"}
                 >
                   Schedule blocks
                 </Button>
@@ -136,13 +181,13 @@ class App extends Component {
             <Card
               style={{
                 backgroundColor:
-                  this.state.view == "block" ? "cornflowerblue" : "#f50057",
-                color: this.state.view == "block" ? "black" : "white",
+                  this.state.view === "block" ? "cornflowerblue" : "#f50057",
+                color: this.state.view === "block" ? "black" : "white",
                 transition: "all 0.5s ease-in"
               }}
             >
               <CardContent>
-                {this.state.view == "block" ? (
+                {this.state.view === "block" ? (
                   <Fragment>
                     <h1>Build blocks!</h1>
                     <p>
@@ -173,6 +218,14 @@ class App extends Component {
                         ))}
                       </Select>
                     </div>
+                    <Button
+                      variant="raised"
+                      onClick={this.publishChanges}
+                      color="primary"
+                      style={{ marginTop: "15px", marginRight: "20px" }}
+                    >
+                      Publish changes <Share style={{ marginLeft: 20 }} />
+                    </Button>
                   </Fragment>
                 )}
               </CardContent>
@@ -202,6 +255,7 @@ class App extends Component {
                   items={this.state.blocks}
                   setSelectedBlock={this.setSelectedBlock}
                   selectedBlock={this.state.selectedBlock}
+                  editSelectedBlock={this.editSelectedBlock}
                 />
               </CardContent>
             </Card>
@@ -221,10 +275,12 @@ class App extends Component {
             )}
           </div>
           <div>
-            {this.state.view == "block" ? (
+            {this.state.view === "block" ? (
               <PiContentList
                 addBlock={this.addBlock}
+                editBlock={this.editBlock}
                 items={this.state.picontent}
+                block={this.state.selectedBlockEdit}
               />
             ) : (
               <Calendar
@@ -234,6 +290,24 @@ class App extends Component {
             )}
           </div>
         </div>
+        {this.state.view == "calendar" && (
+          <Fragment>
+            <div className="new-calendar-btn mui-fixed">
+              <Button
+                variant="fab"
+                color="primary"
+                onClick={this.toggleCalendarDialog}
+              >
+                <Add />
+              </Button>
+            </div>
+            <CalendarDialog
+              addCalendar={this.addCalendarHandler}
+              toggleCalendarDialog={this.toggleCalendarDialog}
+              show={this.state.isCalendarDialogShowing}
+            />
+          </Fragment>
+        )}
       </div>
     );
   }

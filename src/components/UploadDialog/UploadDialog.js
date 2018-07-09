@@ -24,8 +24,8 @@ export default class extends Component {
       autoCloseTimer: 5,
       isSavedAsBlock: false,
       block: {
-        name: '',
-        src: '',
+        name: "",
+        src: "",
         duration: 0
       }
     };
@@ -44,11 +44,24 @@ export default class extends Component {
     this.uploadRef.current.click();
   };
 
-  onUploadHandler = () => {
-    this.setState({ activeStep: 1 });
-    setTimeout(() => {
-      this.setState({ activeStep: 2 });
-    }, 5000);
+  onUploadHandler = event => {
+    const { block } = this.state;
+    const file = event.target.files[0];
+    const video = document.createElement("video");
+    if (file.type.includes("video")) {
+      video.onloadedmetadata = () => {
+        block.duration = Math.ceil(video.duration * 60);
+        this.setState({ block: block });
+      };
+      video.src = URL.createObjectURL(file);
+
+      this.setState({ activeStep: 1 });
+      setTimeout(() => {
+        this.setState({ activeStep: 2 });
+      }, 5000);
+    } else {
+      alert("Wrong file format, upload a video please!");
+    }
   };
 
   onUploadDialogClose = () => {
@@ -63,13 +76,13 @@ export default class extends Component {
   handleCheckboxChange = () => {
     const { isSavedAsBlock } = this.state;
     this.setState({ isSavedAsBlock: !isSavedAsBlock });
-  }
+  };
 
-  onChange = (event) => {
+  onChange = event => {
     const { block } = this.state;
     block.name = event.target.value;
     this.setState({ block });
-  }
+  };
 
   getStepContent = step => {
     switch (step) {
@@ -80,29 +93,47 @@ export default class extends Component {
               Lorem ipsum dolor sit amet consectetur, adipisicing elit.
               Assumenda, corrupti.
             </p>
-            <TextField value={this.state.block.name} onChange={this.onChange} label="Name of file" style={{ marginBottom: '20px' }} />
-            <Button variant="raised" color="primary" onClick={this.startUpload} disabled={this.state.block.name.length < 3}>
+            <TextField
+              value={this.state.block.name}
+              onChange={this.onChange}
+              label="Name of file"
+              style={{ marginBottom: "20px" }}
+            />
+            <Button
+              variant="raised"
+              color="primary"
+              onClick={this.startUpload}
+              disabled={this.state.block.name.length < 3}
+            >
               Upload
             </Button>
           </div>
         );
       case 1:
-        return <div className="stepper-content-div"><CircularProgress color="primary" thickness={7} /></div>;
+        return (
+          <div className="stepper-content-div">
+            <CircularProgress color="primary" thickness={7} />
+          </div>
+        );
       case 2:
         return (
-          <div className="stepper-content-div column" style={{ alignItems: 'center' }}>
+          <div
+            className="stepper-content-div column"
+            style={{ alignItems: "center" }}
+          >
             <div>
               <Zoom in={true} timeout={2000}>
                 <DoneIcon style={{ color: "green", width: 100, height: 100 }} />
               </Zoom>
             </div>
             <div>
-              <Button
-                color="primary"
-                onClick={this.onUploadDialogClose}
-              >Close</Button>
-              <FormControlLabel control={<Checkbox onChange={this.handleCheckboxChange} />} label="Save as a block?">
-              </FormControlLabel>
+              <Button color="primary" onClick={this.onUploadDialogClose}>
+                Close
+              </Button>
+              <FormControlLabel
+                control={<Checkbox onChange={this.handleCheckboxChange} />}
+                label="Save as a block?"
+              />
             </div>
           </div>
         );
@@ -124,12 +155,19 @@ export default class extends Component {
         onClose={this.handleClose}
         aria-labelledby="responsive-dialog-title"
       >
-        {this.state.activeStep == 0 &&
-          <IconButton color="primary" onClick={this.onUploadDialogClose} style={{ alignSelf: 'flex-end' }}>
+        {this.state.activeStep == 0 && (
+          <IconButton
+            color="primary"
+            onClick={this.onUploadDialogClose}
+            style={{ alignSelf: "flex-end" }}
+          >
             <CloseIcon />
           </IconButton>
-        }
-        <DialogTitle id="responsive-dialog-title" style={{ paddingTop: this.state.activeStep == 0 ? 0 : '24px' }}>
+        )}
+        <DialogTitle
+          id="responsive-dialog-title"
+          style={{ paddingTop: this.state.activeStep == 0 ? 0 : "24px" }}
+        >
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit,
           minima.
         </DialogTitle>
@@ -143,9 +181,7 @@ export default class extends Component {
               );
             })}
           </Stepper>
-          <div>
-            {this.getStepContent(this.state.activeStep)}
-          </div>
+          <div>{this.getStepContent(this.state.activeStep)}</div>
         </DialogContent>
         <input
           type="file"

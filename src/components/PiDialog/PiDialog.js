@@ -7,9 +7,7 @@ import {
   Button,
   Select,
   MenuItem,
-  DialogActions,
-  FormControl,
-  InputLabel
+  DialogActions
 } from "@material-ui/core";
 
 export default class PiDialog extends Component {

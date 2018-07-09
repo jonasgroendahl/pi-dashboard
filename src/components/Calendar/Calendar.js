@@ -28,6 +28,7 @@ export default class extends Component {
       firstDay: 1,
       eventOverlap: false,
       selectOverlap: false,
+      columnFormat: "dddd",
       events: [
         {
           start: "2018-07-04 14:00:00",

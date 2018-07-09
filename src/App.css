@@ -56,6 +56,13 @@ body {
   border-color: white !important;
 }
 
+.new-calendar-btn {
+  position: fixed !important;
+  bottom: 20px;
+  right: 20px;
+  z-index: 5;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

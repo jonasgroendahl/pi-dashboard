@@ -4,9 +4,11 @@ import {
   ListItem,
   Avatar,
   ListItemText,
-  ListItemSecondaryAction
+  ListItemSecondaryAction,
+  IconButton
 } from "@material-ui/core";
 import ViewIcon from "@material-ui/icons/ViewDay";
+import EditIcon from "@material-ui/icons/Build";
 
 export default class BlockList extends Component {
   render() {
@@ -20,14 +22,18 @@ export default class BlockList extends Component {
             onClick={() => this.props.setSelectedBlock(item)}
             style={{
               backgroundColor:
-                this.props.selectedBlock == item ? "#eee" : "initial"
+                this.props.selectedBlock === item ? "#eee" : "initial"
             }}
           >
             <Avatar>
               <ViewIcon />
             </Avatar>
             <ListItemText primary={item.name} />
-            <ListItemSecondaryAction />
+            <ListItemSecondaryAction>
+              <IconButton onClick={() => this.props.editSelectedBlock(index)}>
+                <EditIcon />
+              </IconButton>
+            </ListItemSecondaryAction>
           </ListItem>
         ))}
       </List>

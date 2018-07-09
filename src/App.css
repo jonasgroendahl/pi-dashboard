@@ -3,8 +3,7 @@ body {
 }
 
 .App {
-  background: url("http://ksotirov.com/wp-content/uploads/2015/08/wexer_virtual.jpg?id=2229")
-    no-repeat center center fixed;
+  background: url("assets/check_size.jpg") no-repeat center center fixed;
   background-size: cover;
 }
 

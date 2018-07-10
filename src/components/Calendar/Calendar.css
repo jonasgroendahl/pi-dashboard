@@ -25,19 +25,29 @@
 #calendar .fc-toolbar.fc-header-toolbar {
   display: flex;
   justify-content: center;
-  color: white;
+  color: var(--calendarColor);
   font-family: "Montserrat";
 }
 
 #calendar thead {
-  border-color: white;
+  border-color: var(--calendarColor);
 }
 
 #calendar th {
-  color: white;
+  color: var(--calendarColor);
+  border-color: var(--calendarColor);
 }
+
+.fc-row.fc-widget-header {
+  border-color: var(--color);
+}
+
+#calendar td {
+  border-color: var(--calendarColor);
+}
+
 #calendar table tr td span {
-  color: white;
+  color: var(--calendarColor);
 }
 
 #calendar td.fc-today {

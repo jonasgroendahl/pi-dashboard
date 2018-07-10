@@ -2,8 +2,13 @@ body {
   font-family: "Open Sans";
 }
 
+:root {
+  --calendarColor: gray;
+}
+
 .App {
-  background: url("assets/check_size.jpg") no-repeat center center fixed;
+  /*background: url("assets/check_size.jpg") no-repeat center center fixed;*/
+  background-color: powderblue;
   background-size: cover;
 }
 

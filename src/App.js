@@ -54,7 +54,7 @@ class App extends Component {
           name: calendar.name,
           id: calendar.id
         }));
-        this.setState({ calendars: res });
+        this.setState({ calendars: res, selectedCalendar: res[0].id });
       });
   }
 
@@ -90,7 +90,9 @@ class App extends Component {
   };
 
   setSelectedBlock = block => {
-    this.setState({ selectedBlock: block });
+    if (this.state.view == "calendar") {
+      this.setState({ selectedBlock: block });
+    }
   };
 
   editSelectedBlock = blockIndex => {

@@ -7,7 +7,8 @@ import {
   Button,
   Select,
   MenuItem,
-  DialogActions
+  DialogActions,
+  Grow
 } from "@material-ui/core";
 
 export default class PiDialog extends Component {
@@ -22,13 +23,34 @@ export default class PiDialog extends Component {
   state = {
     calendar_id: 0,
     screensaver: "",
-    name: ""
+    name: "",
+    loading: false
   };
+
+  fileRef = React.createRef();
 
   onChange = event => {
     this.setState({
       [event.target.name]: event.target.value
     });
+  };
+
+  onStartUpload = () => {
+    this.fileRef.current.click();
+  };
+
+  onUpload = event => {
+    this.loading = true;
+    const file = event.target.files[0];
+    if (file && file.type.includes("image")) {
+      const fileReader = new FileReader();
+      fileReader.addEventListener("load", () => {
+        this.setState({ screensaver: fileReader.result });
+      });
+      fileReader.readAsDataURL(file);
+    } else {
+      alert("Please pick an image of either type .jpg or .png");
+    }
   };
 
   saveChanges = () => {
@@ -66,15 +88,33 @@ export default class PiDialog extends Component {
                   <MenuItem value={calendar.id}>{calendar.name}</MenuItem>
                 ))}
               </Select>
+
+              <Grow
+                in={this.state.screensaver ? true : false}
+                mountOnEnter
+                unmountOnExit
+              >
+                <img src={this.state.screensaver} alt="" width="200" />
+              </Grow>
             </div>
           </DialogContent>
           <DialogActions>
-            <Button variant="raised" color="secondary">
+            <Button
+              variant="raised"
+              color="secondary"
+              onClick={this.onStartUpload}
+            >
               Upload Screensaver
             </Button>
             <Button variant="raised" color="primary" onClick={this.saveChanges}>
               Save changes
             </Button>
+            <input
+              type="file"
+              ref={this.fileRef}
+              style={{ display: "none" }}
+              onChange={this.onUpload}
+            />
           </DialogActions>
         </form>
       </Dialog>

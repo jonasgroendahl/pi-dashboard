@@ -50,11 +50,13 @@ class App extends Component {
     axios
       .get("https://api-wexer.herokuapp.com/v1/pi/calendars?gym_id=2415")
       .then(res => {
-        res = res.data.map(calendar => ({
-          name: calendar.name,
-          id: calendar.id
-        }));
-        this.setState({ calendars: res, selectedCalendar: res[0].id });
+        if (res.data.length > 0) {
+          res = res.data.map(calendar => ({
+            name: calendar.name,
+            id: calendar.id
+          }));
+          this.setState({ calendars: res, selectedCalendar: res[0].id });
+        }
       });
   }
 

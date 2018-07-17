@@ -8,8 +8,7 @@ import StepButton from "@material-ui/core/StepButton";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import CircularProgress from "@material-ui/core/CircularProgress";
-
-import AddIcon from "@material-ui/icons/Add";
+import axios from "../../axios";
 import DoneIcon from "@material-ui/icons/Done";
 import CloseIcon from "@material-ui/icons/Close";
 
@@ -22,11 +21,13 @@ export default class extends Component {
     this.state = {
       activeStep: 0,
       autoCloseTimer: 5,
-      isSavedAsBlock: false,
+      isSavedAsBlock: true,
       block: {
         name: "",
         src: "",
-        duration: 0
+        duration: 0,
+        gym_id: 0,
+        id: 0
       }
     };
     this.uploadRef = React.createRef();
@@ -49,16 +50,21 @@ export default class extends Component {
     const file = event.target.files[0];
     const video = document.createElement("video");
     if (file.type.includes("video")) {
-      video.onloadedmetadata = () => {
-        block.duration = Math.ceil(video.duration * 60);
-        this.setState({ block: block });
+      this.setState({ activeStep: 1 });
+      video.onloadedmetadata = async () => {
+        console.log("duration", video.duration);
+        block.duration = Math.ceil(video.duration);
+        block.gym_id = this.state.gym_id;
+        const payload = new FormData();
+        payload.append("video", file);
+        payload.append("name", block.name);
+        payload.append("duration", block.duration);
+        payload.append("gym", this.state.gym_id);
+        const result = await axios.post("/v1/uploads/upload_pi", payload);
+        block.id = result.data.id;
+        this.setState({ block: block, activeStep: 2 });
       };
       video.src = URL.createObjectURL(file);
-
-      this.setState({ activeStep: 1 });
-      setTimeout(() => {
-        this.setState({ activeStep: 2 });
-      }, 5000);
     } else {
       alert("Wrong file format, upload a video please!");
     }
@@ -68,7 +74,9 @@ export default class extends Component {
     clearInterval(this.autoCloseTimerInterval);
     this.props.toggleUploadDialog();
     if (this.state.isSavedAsBlock) {
-      this.props.addBlock(this.state.block);
+      this.props.addContent(this.state.block, "save");
+    } else {
+      this.props.addContent(this.state.block);
     }
     this.setState({ activeStep: 0, autoCloseTimer: 5, isSavedAsBlock: false });
   };
@@ -131,7 +139,12 @@ export default class extends Component {
                 Close
               </Button>
               <FormControlLabel
-                control={<Checkbox onChange={this.handleCheckboxChange} />}
+                control={
+                  <Checkbox
+                    disabled={true}
+                    onChange={this.handleCheckboxChange}
+                  />
+                }
                 label="Save as a block?"
               />
             </div>
@@ -158,7 +171,7 @@ export default class extends Component {
         {this.state.activeStep == 0 && (
           <IconButton
             color="primary"
-            onClick={this.onUploadDialogClose}
+            onClick={this.props.toggleUploadDialog}
             style={{ alignSelf: "flex-end" }}
           >
             <CloseIcon />

@@ -3,7 +3,7 @@ import Button from "@material-ui/core/Button";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import { Event, Share, Add } from "@material-ui/icons";
 import PiList from "./components/PiList/PiList";
-import axios from "axios";
+import axios from "./axios";
 import "./App.css";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
@@ -27,7 +27,8 @@ class App extends Component {
     isCalendarDialogShowing: false,
     picontent: [],
     view: "block",
-    calendars: []
+    calendars: [],
+    gym_id: 0
   };
 
   componentDidMount() {
@@ -65,10 +66,18 @@ class App extends Component {
     this.setState({ isUploading: !isUploading });
   };
 
-  addBlock = block => {
-    const { blocks } = this.state;
-    blocks.push(block);
-    this.setState({ blocks });
+  addContent = (content, save) => {
+    const { picontent } = this.state;
+    picontent.push({
+      name: content.name,
+      duration: content.duration,
+      type: 4,
+      gym_id: this.state.gym_id,
+      provider_id: null,
+      id: content.id
+    });
+    console.log("add_new_content", content);
+    this.setState({ picontent });
   };
 
   editBlock = block => {
@@ -266,7 +275,7 @@ class App extends Component {
             <UploadDialog
               show={this.state.isUploading}
               toggleUploadDialog={this.toggleUploadDialog}
-              addBlock={this.addBlock}
+              addContent={this.addContent}
             />
             {this.state.isEditingPi && (
               <PiDialog
@@ -281,7 +290,7 @@ class App extends Component {
           <div>
             {this.state.view === "block" ? (
               <PiContentList
-                addBlock={this.addBlock}
+                addContent={this.addContent}
                 editBlock={this.editBlock}
                 items={this.state.picontent}
                 block={this.state.selectedBlockEdit}

@@ -46,23 +46,28 @@ export default class PiContentList extends Component {
         `https://api-wexer.herokuapp.com/v1/pi/blocks/${this.props.block.id}`
       )
       .then(res => {
+        console.log("fetching block", res);
+        let prev = null;
         const classes = [];
         res.data.length > 0 &&
           res.data.forEach(cl => {
-            const index = classes.findIndex(c => c.content_id == cl.content_id);
-            console.log(index);
-            if (index === -1) {
-              cl.amount = 0;
+            if (!prev || prev.content_id !== cl.content_id) {
+              cl.amount = 1;
               classes.push(cl);
-            } else {
+            }
+            else {
+              const index = classes.length - 1;
               classes[index].amount += 1;
             }
+            prev = cl;
           });
         const mappedData = classes.map(blockItem => ({
           file_name: blockItem.content_file_name,
           duration: parseInt(blockItem.duration),
           amount: blockItem.amount,
-          type: blockItem.type
+          type: blockItem.type,
+          name: blockItem.content_name,
+          content_id: blockItem.content_id
         }));
         this.setState({ block: mappedData });
       });
@@ -117,20 +122,25 @@ export default class PiContentList extends Component {
 
   handleSaveBlock = blockName => {
     const { block } = this.state;
-    const combinedDuration = block.reduce(
-      (acc, blockItem) => (acc += blockItem.duration * blockItem.amount),
-      0
-    );
-    this.props.addBlock({ name: blockName, duration: combinedDuration });
+    let finalDuration = 0;
+    let finalBlock = [];
+    block.forEach(blockItem => {
+      for (let i = 0; i < blockItem.amount; i++) {
+        finalDuration += parseInt(blockItem.duration);
+        finalBlock.push(blockItem.content_id);
+      }
+    });
+    const newBlock = { block: { duration: finalDuration, name: blockName }, items: finalBlock };
+    console.log("adding this block", newBlock);
+    this.props.addBlock(newBlock);
     block.splice(0, block.length);
     this.setState({ showBlockDialog: false, block });
   };
 
   toggleBlockDialog = () => {
     const { showBlockDialog } = this.state;
-    console.log(this.state);
     if (this.state.id) {
-      this.props.editBlock(this.state.block);
+      this.props.editBlock(this.state.id, this.state.block);
       alert("Saved changes to block");
     } else {
       this.setState({ showBlockDialog: !showBlockDialog });
@@ -138,8 +148,15 @@ export default class PiContentList extends Component {
   };
 
   onSearch = event => {
-    this.setState({ searchValue: event.target.value });
+    this.setState({ searchValue: event.target.value, currentIndex: 0 });
   };
+
+  deleteBlock = () => {
+    const { block } = this.state;
+    block.splice(0, block.length);
+    this.setState({ block });
+    this.props.deleteBlock(this.state.id);
+  }
 
   render() {
     const media = {
@@ -149,32 +166,35 @@ export default class PiContentList extends Component {
       position: "relative"
     };
 
-    let classes = this.props.items
-      .filter(cl =>
-        cl.name.toLowerCase().includes(this.state.searchValue.toLowerCase())
-      )
-      .map(
-        (item, index) =>
-          index < this.state.currentIndex + 15 &&
-          index > this.state.currentIndex && (
-            <div>
-              <Tooltip title={item.name}>
-                <Avatar
-                  onClick={() => this.handleClick(item)}
-                  style={media}
-                  src={
-                    item.type === 1
-                      ? `https://nfoo-server.com/ConnectedFitnessLabs/${item.file_name.substr(
-                          0,
-                          item.file_name.length - 4
-                        )}Square.jpg`
-                      : "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png"
-                  }
-                />
-              </Tooltip>
-            </div>
-          )
-      );
+
+    let classes =
+      this.props.items
+        .filter(cl =>
+          cl.name.toLowerCase().includes(this.state.searchValue.toLowerCase())
+        )
+        .map(
+          (item, index) => {
+            if (index <= this.state.currentIndex + 15 &&
+              index >= this.state.currentIndex) {
+              return (
+                <div key={`c_${item.id}`} style={{ marginBottom: 2, animation: "0.3s slideUp" }}>
+                  <Tooltip title={item.name}>
+                    <Avatar
+                      onClick={() => this.handleClick(item)}
+                      style={media}
+                      src={
+                        item.type === 1
+                          ? `https://nfoo-server.com/ConnectedFitnessLabs/${item.file_name.substr(
+                            0,
+                            item.file_name.length - 4
+                          )}Square.jpg`
+                          : "http://www.bsmc.net.au/wp-content/uploads/No-image-available.jpg"
+                      }
+                    />
+                  </Tooltip>
+                </div>);
+            }
+          });
 
     return (
       <div className="pi-content-wrapper">
@@ -210,6 +230,11 @@ export default class PiContentList extends Component {
                 }}
               />
             </IconButton>
+            {this.state.id ?
+              <IconButton onClick={this.deleteBlock}>
+                <Delete style={{ color: 'white' }} />
+              </IconButton> : null
+            }
             <TextField onChange={this.onSearch} label="Search for videos" />
           </div>
           {classes}
@@ -223,18 +248,18 @@ export default class PiContentList extends Component {
                     src={
                       item.type === 1
                         ? `https://nfoo-server.com/ConnectedFitnessLabs/${item.file_name.substr(
-                            0,
-                            item.file_name.length - 4
-                          )}Square.jpg`
+                          0,
+                          item.file_name.length - 4
+                        )}Square.jpg`
                         : "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png"
                     }
                     style={{ width: 80, height: 80 }}
                   />
-                  <h5>{item.file_name}</h5>
+                  <h5>{item.name}</h5>
                   <h5>{`${item.duration *
                     item.amount} seconds - this class will repeat ${
                     item.amount
-                  } time(s)`}</h5>
+                    } time(s)`}</h5>
                 </div>
                 <Slider
                   value={item.amount}

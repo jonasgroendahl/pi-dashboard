@@ -62,3 +62,7 @@
   border: none;
   font-family: "Open Sans";
 }
+
+#calendar .fc-event .fc-time span{
+  color:white;
+}

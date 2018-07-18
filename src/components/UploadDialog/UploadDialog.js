@@ -62,6 +62,7 @@ export default class extends Component {
         payload.append("gym", this.state.gym_id);
         const result = await axios.post("/v1/uploads/upload_pi", payload);
         block.id = result.data.id;
+        console.log("new content got ID:", result.data.id);
         this.setState({ block: block, activeStep: 2 });
       };
       video.src = URL.createObjectURL(file);
@@ -74,6 +75,7 @@ export default class extends Component {
     clearInterval(this.autoCloseTimerInterval);
     this.props.toggleUploadDialog();
     if (this.state.isSavedAsBlock) {
+      console.log("save as a block");
       this.props.addContent(this.state.block, "save");
     } else {
       this.props.addContent(this.state.block);
@@ -141,8 +143,8 @@ export default class extends Component {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={true}
                     onChange={this.handleCheckboxChange}
+                    checked={this.state.isSavedAsBlock}
                   />
                 }
                 label="Save as a block?"

@@ -12,22 +12,26 @@ import {
 } from "@material-ui/core";
 
 export default class PiDialog extends Component {
-  componentDidMount() {
-    this.setState({
-      calendar_id: this.props.pi.calendar_id,
-      screensaver: this.props.pi.screensaver,
-      name: this.props.pi.name
-    });
-  }
 
   state = {
     calendar_id: 0,
     screensaver: "",
     name: "",
-    loading: false
+    loading: false,
+    screensaverFileRef: null,
+    id: 0
   };
 
   fileRef = React.createRef();
+
+  componentDidMount() {
+    this.setState({
+      calendar_id: this.props.pi.calendar_id,
+      screensaver: this.props.pi.screensaver,
+      name: this.props.pi.name,
+      id: this.props.pi.id
+    });
+  }
 
   onChange = event => {
     this.setState({
@@ -45,7 +49,7 @@ export default class PiDialog extends Component {
     if (file && file.type.includes("image")) {
       const fileReader = new FileReader();
       fileReader.addEventListener("load", () => {
-        this.setState({ screensaver: fileReader.result });
+        this.setState({ screensaver: fileReader.result, screensaverFileRef: file });
       });
       fileReader.readAsDataURL(file);
     } else {
@@ -57,8 +61,12 @@ export default class PiDialog extends Component {
     const pi = {
       name: this.state.name,
       calendar_id: this.state.calendar_id,
-      screensaver: this.state.screensaver
+      id: this.state.id
     };
+    if (this.state.screensaverFileRef) {
+      pi.screensaver = this.state.screensaverFileRef;
+    }
+    console.log("saving changes for", pi);
     this.props.editPi(pi);
   };
 

@@ -14,6 +14,7 @@ import Calendar from "./components/Calendar/Calendar";
 import PiDialog from "./components/PiDialog/PiDialog";
 import CalendarDialog from "./components/CalendarDialog/CalendarDialog";
 import { Select, MenuItem } from "@material-ui/core";
+import client from "./realtime";
 
 class App extends Component {
   state = {
@@ -28,28 +29,29 @@ class App extends Component {
     picontent: [],
     view: "block",
     calendars: [],
-    gym_id: 0
+    gym_id: 1875
   };
 
   componentDidMount() {
-    axios.get("https://api-wexer.herokuapp.com/v1/pi?gym_id=2415").then(res => {
+    axios.get(`https://api-wexer.herokuapp.com/v1/pi?gym_id=${this.state.gym_id}`).then(res => {
       console.log(res);
       this.setState({ pis: res.data });
     });
     axios
-      .get("https://api-wexer.herokuapp.com/v1/pi/blocks?gym_id=2415")
+      .get(`https://api-wexer.herokuapp.com/v1/pi/blocks?gym_id=${this.state.gym_id}`)
       .then(res => {
         console.log("blocks", res);
         this.setState({ blocks: res.data });
       });
     axios
-      .get("https://api-wexer.herokuapp.com/v1/pi/content?gym_id=2415")
+      .get(`https://api-wexer.herokuapp.com/v1/pi/content?gym_id=${this.state.gym_id}`)
       .then(res => {
         console.log("content", res);
-        this.setState({ picontent: res.data });
+        const data = res.data.map(piC => ({ ...piC, content_id: piC.id }));
+        this.setState({ picontent: data });
       });
     axios
-      .get("https://api-wexer.herokuapp.com/v1/pi/calendars?gym_id=2415")
+      .get(`https://api-wexer.herokuapp.com/v1/pi/calendars?gym_id=${this.state.gym_id}`)
       .then(res => {
         if (res.data.length > 0) {
           res = res.data.map(calendar => ({
@@ -66,7 +68,7 @@ class App extends Component {
     this.setState({ isUploading: !isUploading });
   };
 
-  addContent = (content, save) => {
+  addContent = async (content, save) => {
     const { picontent } = this.state;
     picontent.push({
       name: content.name,
@@ -76,14 +78,47 @@ class App extends Component {
       provider_id: null,
       id: content.id
     });
-    console.log("add_new_content", content);
+    console.log(save);
+    if (save) {
+      console.log("adding block");
+      const block = { block: { duration: content.duration, gym_id: this.state.gym_id, name: content.name }, items: [content.id] };
+      this.addBlock(block);
+    }
     this.setState({ picontent });
   };
 
-  editBlock = block => {
+  addBlock = async (block) => {
     const { blocks } = this.state;
+    if (!block.block.gym_id) {
+      block.block.gym_id = this.state.gym_id;
+    }
+    const result = await axios.post(`/v2/blocks`, block);
+    const newBlock = {
+      duration: block.block.duration,
+      name: block.block.name,
+      id: result.data.id,
+      gym_id: this.state.gym_id
+    };
+    blocks.push(newBlock);
+    this.setState({ blocks });
+  }
+
+  editBlock = (id, block) => {
+    const { blocks } = this.state;
+    const finalBlock = [];
+    let finalDuration = 0;
+    block.forEach(blockItem => {
+      for (let i = 0; i < blockItem.amount; i++) {
+        finalDuration += blockItem.duration;
+        finalBlock.push({ content_id: blockItem.content_id, block_id: id });
+      }
+    });
     const index = blocks.findIndex(bl => bl.id == block.id);
-    blocks[index] = block;
+    blocks[index] = { id, duration: finalDuration };
+    console.log("block updated to ", { id, duration: finalDuration });
+    console.log("finalBlock", finalBlock);
+    console.log("finalDuration", finalDuration);
+    axios.put(`/v2/blocks/${id}`, { block: { duration: finalDuration }, items: finalBlock });
     this.setState({ blocks });
   };
 
@@ -93,40 +128,44 @@ class App extends Component {
     this.setState({ isEditingPi: !isEditingPi, selectedPi });
   };
 
-  editPi = pi => {
+  editPi = async pi => {
     const { selectedPi, pis } = this.state;
+    const payload = new FormData();
+    if (pi.screensaver) {
+      payload.append("file", pi.screensaver);
+    }
+    payload.append("calendar_id", pi.calendar_id);
+    payload.append("name", pi.name);
+    const result = await axios.put(`/v2/pi/${pi.id}`, payload);
     const piIndex = pis.findIndex(pi => pi === selectedPi);
+    // set new screensaver if we uploaded one
+    if (pi.screensaver) {
+      pi.screensaver = result.data;
+    }
+    else {
+      pi.screensaver = pis[piIndex].screensaver;
+    }
     pis[piIndex] = pi;
     this.setState({ pis, selectedPi: null, isEditingPi: false });
   };
 
   setSelectedBlock = block => {
-    if (this.state.view == "calendar") {
-      this.setState({ selectedBlock: block });
-    }
+    this.setState({ selectedBlock: block, view: 'block' });
   };
 
-  editSelectedBlock = blockIndex => {
-    this.setState({
-      selectedBlock: this.state.blocks[blockIndex],
-      selectedBlockEdit: this.state.blocks[blockIndex],
-      view: "block"
-    });
-  };
+
 
   changeView = view => {
     let {
       selectedCalendar,
       calendars,
-      selectedBlockEdit,
       selectedBlock
     } = this.state;
+    selectedBlock = null;
     if (view === "block") {
-      selectedBlockEdit = null;
-      selectedBlock = null;
       selectedCalendar = calendars.length > 0 ? calendars[0].id : 0;
     }
-    this.setState({ view, selectedCalendar, selectedBlockEdit, selectedBlock });
+    this.setState({ view, selectedCalendar, selectedBlock });
   };
 
   handleCalendarChange = event => {
@@ -134,7 +173,16 @@ class App extends Component {
   };
 
   publishChanges = () => {
-    alert("Changes published");
+    const pi = this.state.pis.find(pi => pi.calendar_id == this.state.selectedCalendar);
+    console.log(pi);
+    if (pi == undefined) {
+      alert('Assign a Circuit to the schedule before publishing');
+    }
+    else {
+      console.log("Publishing to PI with id", pi.id);
+      client.send("devices:pi_" + pi.id, "refresh");
+      alert("Changes published");
+    }
   };
 
   toggleCalendarDialog = () => {
@@ -142,16 +190,25 @@ class App extends Component {
     this.setState({ isCalendarDialogShowing: !isCalendarDialogShowing });
   };
 
-  addCalendarHandler = name => {
+  addCalendarHandler = async name => {
     const { calendars } = this.state;
+    const id = await axios.post(`/v2/pi/calendar`, { name: name, gym_id: this.state.gym_id });
     const calendarObj = {
-      id: 9999,
+      id: parseInt(id.data),
       name
     };
     calendars.push(calendarObj);
     this.toggleCalendarDialog();
     this.setState({ calendars });
   };
+
+  deleteBlock = async (id) => {
+    const { blocks } = this.state;
+    axios.delete(`/v2/blocks/${id}`);
+    const index = blocks.findIndex(bl => bl.id == id);
+    blocks.splice(index, 1);
+    this.setState({ blocks });
+  }
 
   render() {
     return (
@@ -175,7 +232,7 @@ class App extends Component {
                   style={{ margin: "5px" }}
                   disabled={
                     this.state.view === "block" &&
-                    this.state.selectedBlockEdit === null
+                    this.state.selectedBlock === null
                   }
                 >
                   Build a new block
@@ -210,37 +267,37 @@ class App extends Component {
                     </p>
                   </Fragment>
                 ) : (
-                  <Fragment>
-                    <h1>Calendar</h1>
-                    <p>
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Reiciendis, perspiciatis?
+                    <Fragment>
+                      <h1>Calendar</h1>
+                      <p>
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        Reiciendis, perspiciatis?
                     </p>
-                    <div className="flex">
-                      <Event style={{ marginRight: 10 }} />
-                      <Select
-                        value={this.state.selectedCalendar}
-                        onChange={this.handleCalendarChange}
-                        fullWidth
-                        className="white-select"
+                      <div className="flex">
+                        <Event style={{ marginRight: 10 }} />
+                        <Select
+                          value={this.state.selectedCalendar}
+                          onChange={this.handleCalendarChange}
+                          fullWidth
+                          className="white-select"
+                        >
+                          {this.state.calendars.map(calendar => (
+                            <MenuItem value={calendar.id}>
+                              {calendar.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </div>
+                      <Button
+                        variant="raised"
+                        onClick={this.publishChanges}
+                        color="primary"
+                        style={{ marginTop: "15px", marginRight: "20px" }}
                       >
-                        {this.state.calendars.map(calendar => (
-                          <MenuItem value={calendar.id}>
-                            {calendar.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </div>
-                    <Button
-                      variant="raised"
-                      onClick={this.publishChanges}
-                      color="primary"
-                      style={{ marginTop: "15px", marginRight: "20px" }}
-                    >
-                      Publish changes <Share style={{ marginLeft: 20 }} />
-                    </Button>
-                  </Fragment>
-                )}
+                        Publish changes <Share style={{ marginLeft: 20 }} />
+                      </Button>
+                    </Fragment>
+                  )}
               </CardContent>
             </Card>
             <Card raised style={{ alignSelf: "flex-start" }}>
@@ -291,16 +348,18 @@ class App extends Component {
             {this.state.view === "block" ? (
               <PiContentList
                 addContent={this.addContent}
+                addBlock={this.addBlock}
                 editBlock={this.editBlock}
                 items={this.state.picontent}
-                block={this.state.selectedBlockEdit}
+                block={this.state.selectedBlock}
+                deleteBlock={this.deleteBlock}
               />
             ) : (
-              <Calendar
-                selectedBlock={this.state.selectedBlock}
-                selectedCalendar={this.state.selectedCalendar}
-              />
-            )}
+                <Calendar
+                  selectedBlock={this.state.selectedBlock}
+                  selectedCalendar={this.state.selectedCalendar}
+                />
+              )}
           </div>
         </div>
         {this.state.view == "calendar" && (

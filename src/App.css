@@ -10,6 +10,7 @@ body {
   /*background: url("assets/check_size.jpg") no-repeat center center fixed;*/
   background-color: powderblue;
   background-size: cover;
+  min-height: 100vh;
 }
 
 .flex {

@@ -26,7 +26,7 @@ export default class PiList extends Component {
         <ExpansionPanelDetails>
           <List style={{ width: "100%" }}>
             {this.props.items.map((i, index) => (
-              <ListItem>
+              <ListItem key={index}>
                 <Avatar>
                   <ImageIcon />
                 </Avatar>

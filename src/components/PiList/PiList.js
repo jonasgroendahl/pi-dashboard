@@ -20,7 +20,7 @@ export default class PiList extends Component {
             <Avatar>
               <ImageIcon />
             </Avatar>
-            <ListItemText primary="Wexer Circuit systems" />
+            <ListItemText primary="Screens" />
           </ListItem>
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>

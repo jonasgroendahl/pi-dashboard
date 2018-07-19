@@ -6,12 +6,15 @@ import {
   CardContent,
   Avatar,
   IconButton,
-  Tooltip
+  Tooltip,
+  MenuItem,
+  Menu
 } from "@material-ui/core";
 import Slider from "@material-ui/lab/Slider";
 import IconArrowLeft from "@material-ui/icons/ArrowBack";
 import IconArrowRight from "@material-ui/icons/ArrowForward";
 import { Delete, ExpandMore, ExpandLess, Save } from "@material-ui/icons";
+import IconMenu from "@material-ui/icons/Menu";
 import BlockDialog from "../BlockDialog/BlockDialog";
 import axios from "axios";
 
@@ -21,7 +24,9 @@ export default class PiContentList extends Component {
     block: [],
     showBlockDialog: false,
     searchValue: "",
-    id: 0
+    id: 0,
+    keywords: '',
+    blockButtonRef: { element: null, index: 0 }
   };
 
   componentDidMount() {
@@ -33,10 +38,10 @@ export default class PiContentList extends Component {
   componentDidUpdate(prop) {
     console.log("Updating PiContentList");
     if (this.props.block && this.props.block != prop.block) {
-      this.setState({ id: this.props.block.id });
+      this.setState({ id: this.props.block.id, name: this.props.block.name, keywords: this.props.block.keywords });
       this.fetchContent();
     } else if (!this.props.block && prop.block) {
-      this.setState({ block: [], id: 0 });
+      this.setState({ block: [], id: 0, name: '' });
     }
   }
 
@@ -120,7 +125,7 @@ export default class PiContentList extends Component {
     this.setState({ block });
   };
 
-  handleSaveBlock = blockName => {
+  handleSaveBlock = (blockName, keywords) => {
     const { block } = this.state;
     let finalDuration = 0;
     let finalBlock = [];
@@ -130,7 +135,10 @@ export default class PiContentList extends Component {
         finalBlock.push(blockItem.content_id);
       }
     });
-    const newBlock = { block: { duration: finalDuration, name: blockName }, items: finalBlock };
+    const keywordsMapped = keywords
+      .map(key => key.value)
+      .join(',');
+    const newBlock = { block: { duration: finalDuration, name: blockName, keywords: keywordsMapped }, items: finalBlock };
     console.log("adding this block", newBlock);
     this.props.addBlock(newBlock);
     block.splice(0, block.length);
@@ -139,12 +147,8 @@ export default class PiContentList extends Component {
 
   toggleBlockDialog = () => {
     const { showBlockDialog } = this.state;
-    if (this.state.id) {
-      this.props.editBlock(this.state.id, this.state.block);
-      alert("Saved changes to block");
-    } else {
-      this.setState({ showBlockDialog: !showBlockDialog });
-    }
+    this.setState({ showBlockDialog: !showBlockDialog });
+
   };
 
   onSearch = event => {
@@ -156,6 +160,20 @@ export default class PiContentList extends Component {
     block.splice(0, block.length);
     this.setState({ block });
     this.props.deleteBlock(this.state.id);
+  }
+
+  setAmount = (seconds, index) => {
+    const { block } = this.state;
+    const repeat = Math.floor(seconds / block[index].duration);
+    block[index].amount = repeat;
+    console.log(repeat, index);
+    this.setState({ block, blockButtonRef: { element: null, index: 0 } });
+  }
+
+  setBlockButtonRef = (event, index) => {
+    console.log(event, index);
+    const blockButtonRef = { element: event.target, index: index }
+    this.setState({ blockButtonRef })
   }
 
   render() {
@@ -235,7 +253,7 @@ export default class PiContentList extends Component {
                 <Delete style={{ color: 'white' }} />
               </IconButton> : null
             }
-            <TextField onChange={this.onSearch} label="Search for videos" />
+            <TextField onChange={this.onSearch} label="Search by title" />
           </div>
           {classes}
         </div>
@@ -292,6 +310,9 @@ export default class PiContentList extends Component {
                       <ExpandMore />
                     </IconButton>
                   )}
+                  <IconButton onClick={(event) => this.setBlockButtonRef(event, index)}>
+                    <IconMenu />
+                  </IconButton>
                 </div>
               </CardContent>
             </Card>
@@ -303,8 +324,16 @@ export default class PiContentList extends Component {
             toggleBlockDialog={this.toggleBlockDialog}
             items={this.state.block}
             handleSaveBlock={this.handleSaveBlock}
+            id={this.state.id}
+            name={this.state.name}
+            keywords={this.state.keywords}
           />
         }
+        <Menu anchorEl={this.state.blockButtonRef.element} open={Boolean(this.state.blockButtonRef.element)}>
+          <MenuItem onClick={() => this.setAmount(30, this.state.blockButtonRef.index)}>Repeat 30 seconds</MenuItem>
+          <MenuItem onClick={() => this.setAmount(60, this.state.blockButtonRef.index)}>Repeat 60 seconds</MenuItem>
+          <MenuItem onClick={() => this.setAmount(90, this.state.blockButtonRef.index)}>Repeat 90 seconds</MenuItem>
+        </Menu>
       </div>
     );
   }

@@ -7,6 +7,7 @@
     "@material-ui/icons": "^1.1.0",
     "@material-ui/lab": "^1.0.0-alpha.5",
     "axios": "^0.18.0",
+    "downshift": "^2.0.16",
     "dragula": "^3.7.2",
     "fullcalendar": "^4.0.0-alpha",
     "moment": "^2.22.2",

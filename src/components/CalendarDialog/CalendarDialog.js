@@ -22,7 +22,7 @@ export default class CalendarDialog extends Component {
       <Dialog open={this.props.show} onClose={this.props.toggleCalendarDialog}>
         <DialogTitle>Lorem ipsum dolor sit amet.</DialogTitle>
         <DialogContent>
-          <TextField label="Calendar name" onChange={this.onChange} />
+          <TextField label="Name" onChange={this.onChange} />
         </DialogContent>
         <DialogActions>
           <Button
@@ -30,7 +30,7 @@ export default class CalendarDialog extends Component {
             variant="raised"
             onClick={() => this.props.addCalendar(this.state.name)}
           >
-            Add calendar
+            Add planner
           </Button>
           <Button
             color="primary"

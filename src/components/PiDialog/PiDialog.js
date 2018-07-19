@@ -8,8 +8,12 @@ import {
   Select,
   MenuItem,
   DialogActions,
-  Grow
+  Grow,
+  Grid,
+  FormControl,
+  InputLabel
 } from "@material-ui/core";
+import { Event } from "@material-ui/icons";
 
 export default class PiDialog extends Component {
 
@@ -83,26 +87,35 @@ export default class PiDialog extends Component {
                 value={this.state.name}
                 onChange={this.onChange}
               />
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Quisquam, recusandae.
-              </p>
-              <Select
-                name="calendar_id"
-                value={this.state.calendar_id}
-                onChange={this.onChange}
-              >
-                {this.props.calendars.map(calendar => (
-                  <MenuItem value={calendar.id}>{calendar.name}</MenuItem>
-                ))}
-              </Select>
+              <Grid container spacing={8} alignItems="flex-end" style={{ marginTop: 5 }}>
+                <Grid item>
+                  <Event />
+                </Grid>
+                <Grid item style={{ flex: 1 }}>
+                  <FormControl fullWidth>
+                    <InputLabel htmlFor="select-calendar">Select planner</InputLabel>
+                    <Select
+                      name="calendar_id"
+                      value={this.state.calendar_id}
+                      onChange={this.onChange}
+                      id="select-calendar"
+                    >
+                      {this.props.calendars.map(calendar => (
+                        <MenuItem value={calendar.id}>{calendar.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
 
               <Grow
                 in={this.state.screensaver ? true : false}
                 mountOnEnter
                 unmountOnExit
               >
-                <img src={this.state.screensaver} alt="" width="200" />
+                <div className="flex" style={{ justifyContent: 'center' }}>
+                  <img src={this.state.screensaver} alt="" height="200" />
+                </div>
               </Grow>
             </div>
           </DialogContent>

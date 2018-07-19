@@ -13,7 +13,7 @@ import PiContentList from "./components/PiContentList/PiContentList";
 import Calendar from "./components/Calendar/Calendar";
 import PiDialog from "./components/PiDialog/PiDialog";
 import CalendarDialog from "./components/CalendarDialog/CalendarDialog";
-import { Select, MenuItem } from "@material-ui/core";
+import { Select, MenuItem, CardActions, Menu } from "@material-ui/core";
 import client from "./realtime";
 
 class App extends Component {
@@ -29,29 +29,30 @@ class App extends Component {
     picontent: [],
     view: "block",
     calendars: [],
-    gym_id: 1875
+    gym_id: 1875,
+    isDublicating: null // ref to button
   };
 
   componentDidMount() {
-    axios.get(`https://api-wexer.herokuapp.com/v1/pi?gym_id=${this.state.gym_id}`).then(res => {
+    axios.get(`/v1/pi?gym_id=${this.state.gym_id}`).then(res => {
       console.log(res);
       this.setState({ pis: res.data });
     });
     axios
-      .get(`https://api-wexer.herokuapp.com/v1/pi/blocks?gym_id=${this.state.gym_id}`)
+      .get(`/v1/pi/blocks?gym_id=${this.state.gym_id}`)
       .then(res => {
         console.log("blocks", res);
         this.setState({ blocks: res.data });
       });
     axios
-      .get(`https://api-wexer.herokuapp.com/v1/pi/content?gym_id=${this.state.gym_id}`)
+      .get(`/v1/pi/content?gym_id=${this.state.gym_id}`)
       .then(res => {
         console.log("content", res);
         const data = res.data.map(piC => ({ ...piC, content_id: piC.id }));
         this.setState({ picontent: data });
       });
     axios
-      .get(`https://api-wexer.herokuapp.com/v1/pi/calendars?gym_id=${this.state.gym_id}`)
+      .get(`/v1/pi/calendars?gym_id=${this.state.gym_id}`)
       .then(res => {
         if (res.data.length > 0) {
           res = res.data.map(calendar => ({
@@ -210,6 +211,22 @@ class App extends Component {
     this.setState({ blocks });
   }
 
+  toggleIsDublicating = (event) => {
+    if (event) {
+      this.setState({ isDublicating: event.target });
+    }
+    else {
+      this.setState({ isDublicating: null });
+    }
+  }
+
+  copyHandler = async (to) => {
+    console.log(this.state.selectedCalendar, to);
+    await axios.post(`/v2/blocks/extras/copy`, { from: this.state.selectedCalendar, to });
+    this.toggleIsDublicating(null);
+    alert("Copy successful!");
+  }
+
   render() {
     return (
       <div className="App">
@@ -217,7 +234,7 @@ class App extends Component {
           <div className="left-menu-wrapper">
             <PiList items={this.state.pis} toggleEditPi={this.toggleEditPi} />
             <div />
-            <Card raised>
+            <Card raised style={{ display: 'flex', flexDirection: 'column' }}>
               <CardContent>
                 <h2>Manage your content</h2>
                 <p>
@@ -225,11 +242,12 @@ class App extends Component {
                   Eaque iure velit quidem nesciunt rem, ullam porro recusandae
                   ut tenetur dolorem?
                 </p>
+              </CardContent>
+              <CardActions style={{ marginTop: 'auto' }}>
                 <Button
                   variant="contained"
                   color="secondary"
                   onClick={() => this.changeView("block")}
-                  style={{ margin: "5px" }}
                   disabled={
                     this.state.view === "block" &&
                     this.state.selectedBlock === null
@@ -241,12 +259,12 @@ class App extends Component {
                   variant="raised"
                   color={"primary"}
                   onClick={() => this.changeView("calendar")}
-                  style={{ margin: "5px" }}
                   disabled={this.state.view === "calendar"}
+
                 >
                   Schedule blocks
                 </Button>
-              </CardContent>
+              </CardActions>
             </Card>
             <Card
               style={{
@@ -256,23 +274,23 @@ class App extends Component {
                 transition: "all 0.5s ease-in"
               }}
             >
-              <CardContent>
-                {this.state.view === "block" ? (
+              {this.state.view === "block" ? (
+                <CardContent>
+                  <h1>Build blocks!</h1>
+                  <p>
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                    Cupiditate voluptate sequi suscipit aliquid assumenda,
+                    iure debitis totam ipsum quisquam? Sunt.
+                    </p>
+                </CardContent>
+              ) : (
                   <Fragment>
-                    <h1>Build blocks!</h1>
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                      Cupiditate voluptate sequi suscipit aliquid assumenda,
-                      iure debitis totam ipsum quisquam? Sunt.
-                    </p>
-                  </Fragment>
-                ) : (
-                    <Fragment>
-                      <h1>Calendar</h1>
+                    <CardContent>
+                      <h1>Planner</h1>
                       <p>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Reiciendis, perspiciatis?
+                        Schedule your blocks by dragging them onto the planner. Press 'Copy' if you wish to dublicate the content on the current selected planner onto another one.
                     </p>
+                      <p>Note! This will delete all scheduled blocks on the planner you're copying over to.</p>
                       <div className="flex">
                         <Event style={{ marginRight: 10 }} />
                         <Select
@@ -288,17 +306,24 @@ class App extends Component {
                           ))}
                         </Select>
                       </div>
+                    </CardContent>
+                    <CardActions>
                       <Button
                         variant="raised"
                         onClick={this.publishChanges}
                         color="primary"
-                        style={{ marginTop: "15px", marginRight: "20px" }}
                       >
-                        Publish changes <Share style={{ marginLeft: 20 }} />
+                        Publish <Share style={{ marginLeft: 20 }} />
                       </Button>
-                    </Fragment>
-                  )}
-              </CardContent>
+                      <Button onClick={this.toggleIsDublicating}>Copy?</Button>
+                      <Menu anchorEl={this.state.isDublicating} open={Boolean(this.state.isDublicating)} onClose={() => this.toggleIsDublicating(null)}>
+                        {this.state.calendars.map(cal => cal.id !== this.state.selectedCalendar ?
+                          <MenuItem onClick={() => this.copyHandler(cal.id)}>{cal.name}</MenuItem> : null)}
+                      </Menu>
+                    </CardActions>
+                  </Fragment>
+                )}
+
             </Card>
             <Card raised style={{ alignSelf: "flex-start" }}>
               <CardContent>
@@ -308,6 +333,8 @@ class App extends Component {
                   Eaque iure velit quidem nesciunt rem, ullam porro recusandae
                   ut tenetur dolorem?
                 </p>
+              </CardContent>
+              <CardActions>
                 <Button
                   variant="contained"
                   color="primary"
@@ -316,7 +343,7 @@ class App extends Component {
                   Begin upload wizard
                   <CloudUploadIcon style={{ marginLeft: "15px" }} />
                 </Button>
-              </CardContent>
+              </CardActions>
             </Card>
             <Card>
               <CardContent>

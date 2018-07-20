@@ -34,34 +34,41 @@ class App extends Component {
   };
 
   componentDidMount() {
-    axios.get(`/v1/pi?gym_id=${this.state.gym_id}`).then(res => {
-      console.log(res);
-      this.setState({ pis: res.data });
+    const queryParams = new URLSearchParams(window.location.href.substr(window.location.href.indexOf('?')));
+    const entries = queryParams.entries();
+    for (const pair of entries) {
+      console.log(pair[0] + ', ' + pair[1]);
+    }
+    console.log("URL", window.location.href.substr(window.location.href.indexOf('?')), queryParams.get('gym_id'));
+    if (queryParams.get('gym_id')) {
+      console.log("Query Params found!", queryParams.get("gym_id"));
+      this.setState({ gym_id: parseInt(queryParams.get('gym_id')) }, () => this.getDataFromApiOnStartUp());
+    }
+    else {
+      this.getDataFromApiOnStartUp();
+    }
+  }
+
+  getDataFromApiOnStartUp = () => {
+    const getPis = axios.get(`/v1/pi?gym_id=${this.state.gym_id}`);
+    const getBlocks = axios.get(`/v1/pi/blocks?gym_id=${this.state.gym_id}`);
+    const getContent = axios.get(`/v1/pi/content?gym_id=${this.state.gym_id}`);
+    const getCalendars = axios.get(`/v1/pi/calendars?gym_id=${this.state.gym_id}`);
+    Promise.all([getPis, getBlocks, getContent, getCalendars]).then(values => {
+      const pis = values[0].data;
+      const blocks = values[1].data;
+      const content = values[2].data;
+      const calendars = values[3].data;
+      let calendarsResult = [{ id: 0 }];
+      if (calendars.length > 0) {
+        calendarsResult = calendars.map(calendar => ({
+          name: calendar.name,
+          id: calendar.id
+        }))
+      }
+      const contentResult = content.map(piC => ({ ...piC, content_id: piC.id }));
+      this.setState({ calendars: calendarsResult, selectedCalendar: calendarsResult[0].id, picontent: contentResult, blocks, pis });
     });
-    axios
-      .get(`/v1/pi/blocks?gym_id=${this.state.gym_id}`)
-      .then(res => {
-        console.log("blocks", res);
-        this.setState({ blocks: res.data });
-      });
-    axios
-      .get(`/v1/pi/content?gym_id=${this.state.gym_id}`)
-      .then(res => {
-        console.log("content", res);
-        const data = res.data.map(piC => ({ ...piC, content_id: piC.id }));
-        this.setState({ picontent: data });
-      });
-    axios
-      .get(`/v1/pi/calendars?gym_id=${this.state.gym_id}`)
-      .then(res => {
-        if (res.data.length > 0) {
-          res = res.data.map(calendar => ({
-            name: calendar.name,
-            id: calendar.id
-          }));
-          this.setState({ calendars: res, selectedCalendar: res[0].id });
-        }
-      });
   }
 
   toggleUploadDialog = () => {

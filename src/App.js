@@ -310,10 +310,10 @@ class App extends Component {
                 <CardContent>
                   <h1>Build blocks!</h1>
                   <p>
-                    Click on any of the thumbnails to the right to start build
-                    your block. You can navigate through the pages using the
-                    arrows. Click an existing block to edit it. To save changes,
-                    press the disc icon.
+                    Click on any of the thumbnails to the right to start
+                    building your block. You can navigate through the pages
+                    using the arrows. Click an existing block to edit it. To
+                    save changes, press the disc icon.
                   </p>
                 </CardContent>
               ) : (

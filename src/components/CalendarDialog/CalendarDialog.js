@@ -20,7 +20,7 @@ export default class CalendarDialog extends Component {
   render() {
     return (
       <Dialog open={this.props.show} onClose={this.props.toggleCalendarDialog}>
-        <DialogTitle>Lorem ipsum dolor sit amet.</DialogTitle>
+        <DialogTitle>Create a new planner.</DialogTitle>
         <DialogContent>
           <TextField label="Name" onChange={this.onChange} />
         </DialogContent>

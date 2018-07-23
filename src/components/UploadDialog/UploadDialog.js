@@ -99,10 +99,7 @@ export default class extends Component {
       case 0:
         return (
           <div className="stepper-content-div column">
-            <p>
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-              Assumenda, corrupti.
-            </p>
+            <p>Assign a name to your video and press 'Upload'.</p>
             <TextField
               value={this.state.block.name}
               onChange={this.onChange}
@@ -183,8 +180,7 @@ export default class extends Component {
           id="responsive-dialog-title"
           style={{ paddingTop: this.state.activeStep == 0 ? 0 : "24px" }}
         >
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit,
-          minima.
+          Start uploading your own files
         </DialogTitle>
         <DialogContent>
           <Stepper nonLinear activeStep={this.state.activeStep}>

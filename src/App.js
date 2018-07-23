@@ -272,9 +272,8 @@ class App extends Component {
               <CardContent>
                 <h2>Manage your content</h2>
                 <p>
-                  Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                  Eaque iure velit quidem nesciunt rem, ullam porro recusandae
-                  ut tenetur dolorem?
+                  Create blocks for use in your planner as well as schedule them
+                  to your liking.
                 </p>
               </CardContent>
               <CardActions style={{ marginTop: "auto" }}>
@@ -311,9 +310,10 @@ class App extends Component {
                 <CardContent>
                   <h1>Build blocks!</h1>
                   <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                    Cupiditate voluptate sequi suscipit aliquid assumenda, iure
-                    debitis totam ipsum quisquam? Sunt.
+                    Click on any of the thumbnails to the right to start build
+                    your block. You can navigate through the pages using the
+                    arrows. Click an existing block to edit it. To save changes,
+                    press the disc icon.
                   </p>
                 </CardContent>
               ) : (
@@ -322,7 +322,7 @@ class App extends Component {
                     <h1>Planner</h1>
                     <p>
                       Schedule your blocks by dragging them onto the planner.
-                      Press 'Copy' if you wish to dublicate the content on the
+                      Press 'Copy' if you wish to duplicate the content on the
                       current selected planner onto another one.
                     </p>
                     <p>
@@ -376,9 +376,8 @@ class App extends Component {
               <CardContent>
                 <h2>Upload your own videos</h2>
                 <p>
-                  Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                  Eaque iure velit quidem nesciunt rem, ullam porro recusandae
-                  ut tenetur dolorem?
+                  Click the button below to begin uploading your own videos to
+                  the planner
                 </p>
               </CardContent>
               <CardActions>

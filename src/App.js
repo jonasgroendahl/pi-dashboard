@@ -34,17 +34,24 @@ class App extends Component {
   };
 
   componentDidMount() {
-    const queryParams = new URLSearchParams(window.location.href.substr(window.location.href.indexOf('?')));
+    const queryParams = new URLSearchParams(
+      window.location.href.substr(window.location.href.indexOf("?"))
+    );
     const entries = queryParams.entries();
     for (const pair of entries) {
-      console.log(pair[0] + ', ' + pair[1]);
+      console.log(pair[0] + ", " + pair[1]);
     }
-    console.log("URL", window.location.href.substr(window.location.href.indexOf('?')), queryParams.get('gym_id'));
-    if (queryParams.get('gym_id')) {
+    console.log(
+      "URL",
+      window.location.href.substr(window.location.href.indexOf("?")),
+      queryParams.get("gym_id")
+    );
+    if (queryParams.get("gym_id")) {
       console.log("Query Params found!", queryParams.get("gym_id"));
-      this.setState({ gym_id: parseInt(queryParams.get('gym_id')) }, () => this.getDataFromApiOnStartUp());
-    }
-    else {
+      this.setState({ gym_id: parseInt(queryParams.get("gym_id")) }, () =>
+        this.getDataFromApiOnStartUp()
+      );
+    } else {
       this.getDataFromApiOnStartUp();
     }
   }
@@ -53,7 +60,9 @@ class App extends Component {
     const getPis = axios.get(`/v1/pi?gym_id=${this.state.gym_id}`);
     const getBlocks = axios.get(`/v1/pi/blocks?gym_id=${this.state.gym_id}`);
     const getContent = axios.get(`/v1/pi/content?gym_id=${this.state.gym_id}`);
-    const getCalendars = axios.get(`/v1/pi/calendars?gym_id=${this.state.gym_id}`);
+    const getCalendars = axios.get(
+      `/v1/pi/calendars?gym_id=${this.state.gym_id}`
+    );
     Promise.all([getPis, getBlocks, getContent, getCalendars]).then(values => {
       const pis = values[0].data;
       const blocks = values[1].data;
@@ -64,12 +73,21 @@ class App extends Component {
         calendarsResult = calendars.map(calendar => ({
           name: calendar.name,
           id: calendar.id
-        }))
+        }));
       }
-      const contentResult = content.map(piC => ({ ...piC, content_id: piC.id }));
-      this.setState({ calendars: calendarsResult, selectedCalendar: calendarsResult[0].id, picontent: contentResult, blocks, pis });
+      const contentResult = content.map(piC => ({
+        ...piC,
+        content_id: piC.id
+      }));
+      this.setState({
+        calendars: calendarsResult,
+        selectedCalendar: calendarsResult[0].id,
+        picontent: contentResult,
+        blocks,
+        pis
+      });
     });
-  }
+  };
 
   toggleUploadDialog = () => {
     const { isUploading } = this.state;
@@ -89,13 +107,20 @@ class App extends Component {
     console.log(save);
     if (save) {
       console.log("adding block");
-      const block = { block: { duration: content.duration, gym_id: this.state.gym_id, name: content.name }, items: [content.id] };
+      const block = {
+        block: {
+          duration: content.duration,
+          gym_id: this.state.gym_id,
+          name: content.name
+        },
+        items: [content.id]
+      };
       this.addBlock(block);
     }
     this.setState({ picontent });
   };
 
-  addBlock = async (block) => {
+  addBlock = async block => {
     const { blocks } = this.state;
     if (!block.block.gym_id) {
       block.block.gym_id = this.state.gym_id;
@@ -109,7 +134,7 @@ class App extends Component {
     };
     blocks.push(newBlock);
     this.setState({ blocks });
-  }
+  };
 
   editBlock = (id, block) => {
     const { blocks } = this.state;
@@ -126,7 +151,10 @@ class App extends Component {
     console.log("block updated to ", { id, duration: finalDuration });
     console.log("finalBlock", finalBlock);
     console.log("finalDuration", finalDuration);
-    axios.put(`/v2/blocks/${id}`, { block: { duration: finalDuration }, items: finalBlock });
+    axios.put(`/v2/blocks/${id}`, {
+      block: { duration: finalDuration },
+      items: finalBlock
+    });
     this.setState({ blocks });
   };
 
@@ -149,8 +177,7 @@ class App extends Component {
     // set new screensaver if we uploaded one
     if (pi.screensaver) {
       pi.screensaver = result.data;
-    }
-    else {
+    } else {
       pi.screensaver = pis[piIndex].screensaver;
     }
     pis[piIndex] = pi;
@@ -158,17 +185,11 @@ class App extends Component {
   };
 
   setSelectedBlock = block => {
-    this.setState({ selectedBlock: block, view: 'block' });
+    this.setState({ selectedBlock: block, view: "block" });
   };
 
-
-
   changeView = view => {
-    let {
-      selectedCalendar,
-      calendars,
-      selectedBlock
-    } = this.state;
+    let { selectedCalendar, calendars, selectedBlock } = this.state;
     selectedBlock = null;
     if (view === "block") {
       selectedCalendar = calendars.length > 0 ? calendars[0].id : 0;
@@ -181,12 +202,13 @@ class App extends Component {
   };
 
   publishChanges = () => {
-    const pi = this.state.pis.find(pi => pi.calendar_id == this.state.selectedCalendar);
+    const pi = this.state.pis.find(
+      pi => pi.calendar_id == this.state.selectedCalendar
+    );
     console.log(pi);
     if (pi == undefined) {
-      alert('Assign a Circuit to the schedule before publishing');
-    }
-    else {
+      alert("Assign a screen to the schedule before publishing");
+    } else {
       console.log("Publishing to PI with id", pi.id);
       client.send("devices:pi_" + pi.id, "refresh");
       alert("Changes published");
@@ -200,7 +222,10 @@ class App extends Component {
 
   addCalendarHandler = async name => {
     const { calendars } = this.state;
-    const id = await axios.post(`/v2/pi/calendar`, { name: name, gym_id: this.state.gym_id });
+    const id = await axios.post(`/v2/pi/calendar`, {
+      name: name,
+      gym_id: this.state.gym_id
+    });
     const calendarObj = {
       id: parseInt(id.data),
       name
@@ -210,29 +235,31 @@ class App extends Component {
     this.setState({ calendars });
   };
 
-  deleteBlock = async (id) => {
+  deleteBlock = async id => {
     const { blocks } = this.state;
     axios.delete(`/v2/blocks/${id}`);
     const index = blocks.findIndex(bl => bl.id == id);
     blocks.splice(index, 1);
     this.setState({ blocks });
-  }
+  };
 
-  toggleIsDublicating = (event) => {
+  toggleIsDublicating = event => {
     if (event) {
       this.setState({ isDublicating: event.target });
-    }
-    else {
+    } else {
       this.setState({ isDublicating: null });
     }
-  }
+  };
 
-  copyHandler = async (to) => {
+  copyHandler = async to => {
     console.log(this.state.selectedCalendar, to);
-    await axios.post(`/v2/blocks/extras/copy`, { from: this.state.selectedCalendar, to });
+    await axios.post(`/v2/blocks/extras/copy`, {
+      from: this.state.selectedCalendar,
+      to
+    });
     this.toggleIsDublicating(null);
     alert("Copy successful!");
-  }
+  };
 
   render() {
     return (
@@ -241,7 +268,7 @@ class App extends Component {
           <div className="left-menu-wrapper">
             <PiList items={this.state.pis} toggleEditPi={this.toggleEditPi} />
             <div />
-            <Card raised style={{ display: 'flex', flexDirection: 'column' }}>
+            <Card raised style={{ display: "flex", flexDirection: "column" }}>
               <CardContent>
                 <h2>Manage your content</h2>
                 <p>
@@ -250,7 +277,7 @@ class App extends Component {
                   ut tenetur dolorem?
                 </p>
               </CardContent>
-              <CardActions style={{ marginTop: 'auto' }}>
+              <CardActions style={{ marginTop: "auto" }}>
                 <Button
                   variant="contained"
                   color="secondary"
@@ -263,11 +290,10 @@ class App extends Component {
                   Build a new block
                 </Button>
                 <Button
-                  variant="raised"
+                  variant="contained"
                   color={"primary"}
                   onClick={() => this.changeView("calendar")}
                   disabled={this.state.view === "calendar"}
-
                 >
                   Schedule blocks
                 </Button>
@@ -286,51 +312,65 @@ class App extends Component {
                   <h1>Build blocks!</h1>
                   <p>
                     Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                    Cupiditate voluptate sequi suscipit aliquid assumenda,
-                    iure debitis totam ipsum quisquam? Sunt.
-                    </p>
+                    Cupiditate voluptate sequi suscipit aliquid assumenda, iure
+                    debitis totam ipsum quisquam? Sunt.
+                  </p>
                 </CardContent>
               ) : (
-                  <Fragment>
-                    <CardContent>
-                      <h1>Planner</h1>
-                      <p>
-                        Schedule your blocks by dragging them onto the planner. Press 'Copy' if you wish to dublicate the content on the current selected planner onto another one.
+                <Fragment>
+                  <CardContent>
+                    <h1>Planner</h1>
+                    <p>
+                      Schedule your blocks by dragging them onto the planner.
+                      Press 'Copy' if you wish to dublicate the content on the
+                      current selected planner onto another one.
                     </p>
-                      <p>Note! This will delete all scheduled blocks on the planner you're copying over to.</p>
-                      <div className="flex">
-                        <Event style={{ marginRight: 10 }} />
-                        <Select
-                          value={this.state.selectedCalendar}
-                          onChange={this.handleCalendarChange}
-                          fullWidth
-                          className="white-select"
-                        >
-                          {this.state.calendars.map(calendar => (
-                            <MenuItem value={calendar.id}>
-                              {calendar.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </div>
-                    </CardContent>
-                    <CardActions>
-                      <Button
-                        variant="raised"
-                        onClick={this.publishChanges}
-                        color="primary"
+                    <p>
+                      Note! This will delete all scheduled blocks on the planner
+                      you're copying over to.
+                    </p>
+                    <div className="flex">
+                      <Event style={{ marginRight: 10 }} />
+                      <Select
+                        value={this.state.selectedCalendar}
+                        onChange={this.handleCalendarChange}
+                        fullWidth
+                        className="white-select"
                       >
-                        Publish <Share style={{ marginLeft: 20 }} />
-                      </Button>
-                      <Button onClick={this.toggleIsDublicating}>Copy?</Button>
-                      <Menu anchorEl={this.state.isDublicating} open={Boolean(this.state.isDublicating)} onClose={() => this.toggleIsDublicating(null)}>
-                        {this.state.calendars.map(cal => cal.id !== this.state.selectedCalendar ?
-                          <MenuItem onClick={() => this.copyHandler(cal.id)}>{cal.name}</MenuItem> : null)}
-                      </Menu>
-                    </CardActions>
-                  </Fragment>
-                )}
-
+                        {this.state.calendars.map(calendar => (
+                          <MenuItem value={calendar.id}>
+                            {calendar.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </div>
+                  </CardContent>
+                  <CardActions>
+                    <Button
+                      variant="contained"
+                      onClick={this.publishChanges}
+                      color="default"
+                    >
+                      Publish <Share style={{ marginLeft: 20 }} />
+                    </Button>
+                    <Button onClick={this.toggleIsDublicating}>Copy?</Button>
+                    <Menu
+                      anchorEl={this.state.isDublicating}
+                      open={Boolean(this.state.isDublicating)}
+                      onClose={() => this.toggleIsDublicating(null)}
+                    >
+                      {this.state.calendars.map(
+                        cal =>
+                          cal.id !== this.state.selectedCalendar ? (
+                            <MenuItem onClick={() => this.copyHandler(cal.id)}>
+                              {cal.name}
+                            </MenuItem>
+                          ) : null
+                      )}
+                    </Menu>
+                  </CardActions>
+                </Fragment>
+              )}
             </Card>
             <Card raised style={{ alignSelf: "flex-start" }}>
               <CardContent>
@@ -389,11 +429,11 @@ class App extends Component {
                 deleteBlock={this.deleteBlock}
               />
             ) : (
-                <Calendar
-                  selectedBlock={this.state.selectedBlock}
-                  selectedCalendar={this.state.selectedCalendar}
-                />
-              )}
+              <Calendar
+                selectedBlock={this.state.selectedBlock}
+                selectedCalendar={this.state.selectedCalendar}
+              />
+            )}
           </div>
         </div>
         {this.state.view == "calendar" && (

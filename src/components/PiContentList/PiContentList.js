@@ -25,7 +25,7 @@ export default class PiContentList extends Component {
     showBlockDialog: false,
     searchValue: "",
     id: 0,
-    keywords: '',
+    keywords: "",
     blockButtonRef: { element: null, index: 0 }
   };
 
@@ -38,10 +38,14 @@ export default class PiContentList extends Component {
   componentDidUpdate(prop) {
     console.log("Updating PiContentList");
     if (this.props.block && this.props.block != prop.block) {
-      this.setState({ id: this.props.block.id, name: this.props.block.name, keywords: this.props.block.keywords });
+      this.setState({
+        id: this.props.block.id,
+        name: this.props.block.name,
+        keywords: this.props.block.keywords
+      });
       this.fetchContent();
     } else if (!this.props.block && prop.block) {
-      this.setState({ block: [], id: 0, name: '' });
+      this.setState({ block: [], id: 0, name: "" });
     }
   }
 
@@ -59,8 +63,7 @@ export default class PiContentList extends Component {
             if (!prev || prev.content_id !== cl.content_id) {
               cl.amount = 1;
               classes.push(cl);
-            }
-            else {
+            } else {
               const index = classes.length - 1;
               classes[index].amount += 1;
             }
@@ -135,10 +138,15 @@ export default class PiContentList extends Component {
         finalBlock.push(blockItem.content_id);
       }
     });
-    const keywordsMapped = keywords
-      .map(key => key.value)
-      .join(',');
-    const newBlock = { block: { duration: finalDuration, name: blockName, keywords: keywordsMapped }, items: finalBlock };
+    const keywordsMapped = keywords.map(key => key.value).join(",");
+    const newBlock = {
+      block: {
+        duration: finalDuration,
+        name: blockName,
+        keywords: keywordsMapped
+      },
+      items: finalBlock
+    };
     console.log("adding this block", newBlock);
     this.props.addBlock(newBlock);
     block.splice(0, block.length);
@@ -148,7 +156,6 @@ export default class PiContentList extends Component {
   toggleBlockDialog = () => {
     const { showBlockDialog } = this.state;
     this.setState({ showBlockDialog: !showBlockDialog });
-
   };
 
   onSearch = event => {
@@ -160,21 +167,22 @@ export default class PiContentList extends Component {
     block.splice(0, block.length);
     this.setState({ block });
     this.props.deleteBlock(this.state.id);
-  }
+  };
 
   setAmount = (seconds, index) => {
     const { block } = this.state;
     const repeat = Math.floor(seconds / block[index].duration);
-    block[index].amount = repeat;
-    console.log(repeat, index);
+    if (repeat > 0) {
+      block[index].amount = repeat;
+    }
     this.setState({ block, blockButtonRef: { element: null, index: 0 } });
-  }
+  };
 
   setBlockButtonRef = (event, index) => {
     console.log(event, index);
-    const blockButtonRef = { element: event.target, index: index }
-    this.setState({ blockButtonRef })
-  }
+    const blockButtonRef = { element: event.target, index: index };
+    this.setState({ blockButtonRef });
+  };
 
   render() {
     const media = {
@@ -184,35 +192,38 @@ export default class PiContentList extends Component {
       position: "relative"
     };
 
-
-    let classes =
-      this.props.items
-        .filter(cl =>
-          cl.name.toLowerCase().includes(this.state.searchValue.toLowerCase())
-        )
-        .map(
-          (item, index) => {
-            if (index <= this.state.currentIndex + 15 &&
-              index >= this.state.currentIndex) {
-              return (
-                <div key={`c_${item.id}`} style={{ marginBottom: 2, animation: "0.3s slideUp" }}>
-                  <Tooltip title={item.name}>
-                    <Avatar
-                      onClick={() => this.handleClick(item)}
-                      style={media}
-                      src={
-                        item.type === 1
-                          ? `https://nfoo-server.com/ConnectedFitnessLabs/${item.file_name.substr(
-                            0,
-                            item.file_name.length - 4
-                          )}Square.jpg`
-                          : "http://www.bsmc.net.au/wp-content/uploads/No-image-available.jpg"
-                      }
-                    />
-                  </Tooltip>
-                </div>);
-            }
-          });
+    let classes = this.props.items
+      .filter(cl =>
+        cl.name.toLowerCase().includes(this.state.searchValue.toLowerCase())
+      )
+      .map((item, index) => {
+        if (
+          index <= this.state.currentIndex + 15 &&
+          index >= this.state.currentIndex
+        ) {
+          return (
+            <div
+              key={`c_${item.id}`}
+              style={{ marginBottom: 2, animation: "0.3s slideUp" }}
+            >
+              <Tooltip title={item.name}>
+                <Avatar
+                  onClick={() => this.handleClick(item)}
+                  style={media}
+                  src={
+                    item.type === 1
+                      ? `https://nfoo-server.com/ConnectedFitnessLabs/${item.file_name.substr(
+                          0,
+                          item.file_name.length - 4
+                        )}Square.jpg`
+                      : "http://www.bsmc.net.au/wp-content/uploads/No-image-available.jpg"
+                  }
+                />
+              </Tooltip>
+            </div>
+          );
+        }
+      });
 
     return (
       <div className="pi-content-wrapper">
@@ -239,20 +250,22 @@ export default class PiContentList extends Component {
                 }}
               />
             </IconButton>
-            <IconButton onClick={this.toggleBlockDialog}>
-              <Save
-                style={{
-                  width: 40,
-                  height: 40,
-                  color: this.state.block.length > 0 ? "white" : "black"
-                }}
-              />
-            </IconButton>
-            {this.state.id ?
+            <Tooltip title="Save changes">
+              <IconButton onClick={this.toggleBlockDialog}>
+                <Save
+                  style={{
+                    width: 40,
+                    height: 40,
+                    color: this.state.block.length > 0 ? "white" : "black"
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+            {this.state.id ? (
               <IconButton onClick={this.deleteBlock}>
-                <Delete style={{ color: 'white' }} />
-              </IconButton> : null
-            }
+                <Delete style={{ color: "white" }} />
+              </IconButton>
+            ) : null}
             <TextField onChange={this.onSearch} label="Search by title" />
           </div>
           {classes}
@@ -266,9 +279,9 @@ export default class PiContentList extends Component {
                     src={
                       item.type === 1
                         ? `https://nfoo-server.com/ConnectedFitnessLabs/${item.file_name.substr(
-                          0,
-                          item.file_name.length - 4
-                        )}Square.jpg`
+                            0,
+                            item.file_name.length - 4
+                          )}Square.jpg`
                         : "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png"
                     }
                     style={{ width: 80, height: 80 }}
@@ -277,7 +290,7 @@ export default class PiContentList extends Component {
                   <h5>{`${item.duration *
                     item.amount} seconds - this class will repeat ${
                     item.amount
-                    } time(s)`}</h5>
+                  } time(s)`}</h5>
                 </div>
                 <Slider
                   value={item.amount}
@@ -310,7 +323,9 @@ export default class PiContentList extends Component {
                       <ExpandMore />
                     </IconButton>
                   )}
-                  <IconButton onClick={(event) => this.setBlockButtonRef(event, index)}>
+                  <IconButton
+                    onClick={event => this.setBlockButtonRef(event, index)}
+                  >
                     <IconMenu />
                   </IconButton>
                 </div>
@@ -329,10 +344,28 @@ export default class PiContentList extends Component {
             keywords={this.state.keywords}
           />
         }
-        <Menu anchorEl={this.state.blockButtonRef.element} open={Boolean(this.state.blockButtonRef.element)}>
-          <MenuItem onClick={() => this.setAmount(30, this.state.blockButtonRef.index)}>Repeat 30 seconds</MenuItem>
-          <MenuItem onClick={() => this.setAmount(60, this.state.blockButtonRef.index)}>Repeat 60 seconds</MenuItem>
-          <MenuItem onClick={() => this.setAmount(90, this.state.blockButtonRef.index)}>Repeat 90 seconds</MenuItem>
+        <Menu
+          anchorEl={this.state.blockButtonRef.element}
+          open={Boolean(this.state.blockButtonRef.element)}
+          onClose={() =>
+            this.setState({ blockButtonRef: { element: null, index: 0 } })
+          }
+        >
+          <MenuItem
+            onClick={() => this.setAmount(30, this.state.blockButtonRef.index)}
+          >
+            Repeat 30 seconds
+          </MenuItem>
+          <MenuItem
+            onClick={() => this.setAmount(60, this.state.blockButtonRef.index)}
+          >
+            Repeat 60 seconds
+          </MenuItem>
+          <MenuItem
+            onClick={() => this.setAmount(90, this.state.blockButtonRef.index)}
+          >
+            Repeat 90 seconds
+          </MenuItem>
         </Menu>
       </div>
     );
